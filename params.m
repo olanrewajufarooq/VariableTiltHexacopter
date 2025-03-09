@@ -27,8 +27,10 @@ v_motor = pi * r_motor^2 * l_motor;
     % Shaft Diameter: 8 mm.
     % Total Length: 9.4 inch / 225 mm
 l_prop = 0.225; %m
-m_prop = 0.024; %kg
+% m_prop = 0.024; %kg
 w_prop = l_prop/5;
+v_prop = l_prop * w_prop;
+
 prop_torque_cw = -0.1; %N.m
 prop_torque_ccw = -0.1;
 
@@ -47,11 +49,11 @@ for i = 1:n_prop
 end
 
 % Compute Densities
-volume = v_ctr_cyl + n_prop*v_arm; 
+volume = v_ctr_cyl + n_prop* (v_arm + v_motor + v_prop); 
 
 density = mass / volume;
 
 m_ctr_cyl = density * v_ctr_cyl;
 m_arm = density * v_arm;
-
 m_motor = density * v_motor;
+m_prop = density * v_prop;
