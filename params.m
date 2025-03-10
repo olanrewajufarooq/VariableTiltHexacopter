@@ -5,8 +5,6 @@ mass = 3.2;
 n_prop = 6;
 DC_Motor_voltage=2;
 
-% test commit
-
 % Centre Cylinder
 r_ctr_cyl = 0.142; % For Frame Size of 600mm (600 - (2*L_arm) = 142mm)
 l_ctr_cyl = 0.05;
