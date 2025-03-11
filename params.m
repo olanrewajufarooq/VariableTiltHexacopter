@@ -1,18 +1,18 @@
 clc; clear;
 
 %% General Specs
-mass = 3;
+mass = 3.2;
 n_prop = 6;
-DC_Motor_voltage=10;
+DC_Motor_voltage=5;
 
 % Centre Cylinder
-r_ctr_cyl = 0.25;
+r_ctr_cyl = 0.142/2; % For Frame Size of 600mm (600 - (2*L_arm) = 142mm)
 l_ctr_cyl = 0.05;
 v_ctr_cyl = pi * r_ctr_cyl^2 * l_ctr_cyl;
 
 % Arms
 r_arm = 0.02;
-l_arm = 0.5;
+l_arm = 0.229; % For 9 inch propeller -> L_arm = 229 mm
 v_arm = pi * r_arm^2 * l_arm;
 
 % Motors
@@ -29,10 +29,11 @@ v_motor = pi * r_motor^2 * l_motor;
 l_prop = 0.225; %m
 % m_prop = 0.024; %kg
 w_prop = l_prop/5;
-v_prop = l_prop * w_prop;
+h_prop = 0.010;
+v_prop = l_prop * w_prop * h_prop;
 
 prop_torque_cw = -0.1; %N.m
-prop_torque_ccw = -0.1;
+prop_torque_ccw = 0.1;
 
 % Position of arms
 
