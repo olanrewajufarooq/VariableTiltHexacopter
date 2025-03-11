@@ -3,10 +3,10 @@ clc; clear;
 %% General Specs
 mass = 3.2;
 n_prop = 6;
-DC_Motor_voltage=2;
+DC_Motor_voltage=5;
 
 % Centre Cylinder
-r_ctr_cyl = 0.142; % For Frame Size of 600mm (600 - (2*L_arm) = 142mm)
+r_ctr_cyl = 0.142/2; % For Frame Size of 600mm (600 - (2*L_arm) = 142mm)
 l_ctr_cyl = 0.05;
 v_ctr_cyl = pi * r_ctr_cyl^2 * l_ctr_cyl;
 
