@@ -21,19 +21,15 @@ l_motor = 0.02;
 v_motor = pi * r_motor^2 * l_motor;
 
 % Propeller - Modeled as a cuboid
-    % Length: 9.4″.
-    % Pitch: 4.3″.
-    % Weight: 24 gm.
-    % Shaft Diameter: 8 mm.
-    % Total Length: 9.4 inch / 225 mm
 l_prop = 0.225; %m
 % m_prop = 0.024; %kg
 w_prop = l_prop/5;
 h_prop = 0.010;
 v_prop = l_prop * w_prop * h_prop;
 
-prop_torque_cw = -2000; %N.m
-prop_torque_ccw = 1500;
+t_cw = -2000; %N.m
+t_ccw = 2000;
+torque = [t_ccw; t_cw; t_ccw; t_cw; t_ccw; t_cw];
 
 % Position of arms
 
@@ -58,36 +54,3 @@ m_ctr_cyl = density * v_ctr_cyl;
 m_arm = density * v_arm;
 m_motor = density * v_motor;
 m_prop = density * v_prop;
-
-%% Calculating Inertia (Neglect value below: Incorrect)
-
-I_prop_propframe = diag([7.22115e-05, 0.00172373, 0.00178915]);
-I_motor_motorframe = diag([0.000112917, 0.000112917, 6.25e-05]);
-I_arm_armframe = diag([0.000529727, 0.000529727, 5.06109e-06]);
-I_base = diag([0.00626046, 0.00626046, 0.0123562]);
-
-skew_form = @(d) [0, -d(3) d(2); d(3), 0, -d(1); -d(2), d(1), 0];
-do_parallel_axis = @(I_x, m_x, d) I_x + m_x * (d' * d * eye(3) - skew_form(d) * d');
-
-I_arms_baseframe = zeros(3, 3);
-I_motors_baseframe = zeros(3, 3);
-I_props_baseframe = zeros(3, 3);
-
-for i = 1:n_prop
-
-    R = arm_pos(i).rot;
-
-    d_armframe_baseframe = arm_pos(i).pos + R'*[l_arm/2; 0; 0];
-    I_arm_baseframe = do_parallel_axis(R*I_arm_armframe*R', m_arm, d_armframe_baseframe);
-    I_arms_baseframe = I_arms_baseframe + I_arm_baseframe;
-
-    d_motorframe_baseframe = arm_pos(i).pos + R'*[l_arm; 0; 0];
-    I_motor_baseframe = do_parallel_axis(R*I_motor_motorframe*R', m_motor, d_motorframe_baseframe);
-    I_motors_baseframe = I_motors_baseframe + I_motor_baseframe;
-
-    d_propframe_baseframe = arm_pos(i).pos + R'*[l_arm; 0; 0];
-    I_prop_baseframe = do_parallel_axis(R*I_prop_propframe*R', m_prop, d_propframe_baseframe);
-    I_props_baseframe = I_props_baseframe + I_prop_baseframe;
-end
-
-I = I_base + I_motor_baseframe + I_arm_baseframe + I_motor_baseframe
