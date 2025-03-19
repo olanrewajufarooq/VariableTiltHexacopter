@@ -1,3 +1,6 @@
+## Ignore Visual Studio temporary files, build results, and
+.vscode/
+
 ## MATLAB Git Ignore
 
 *.slxc
