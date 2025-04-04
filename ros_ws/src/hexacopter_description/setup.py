@@ -1,24 +1,27 @@
-from setuptools import find_packages, setup
+from setuptools import setup
+import os
+from glob import glob
 
 package_name = 'hexacopter_description'
 
 setup(
     name=package_name,
-    version='0.1.0',
-    packages=find_packages(exclude=['test']),
+    version='0.0.1',
+    packages=[package_name],
     data_files=[
-        ('share/ament_index/resource_index/packages',
-            ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
+        (os.path.join('share', package_name, 'urdf'), glob('urdf/*.xacro')),
+        (os.path.join('share', package_name, 'worlds'), glob('worlds/*.sdf')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='Farooq Olanrewaju',
     maintainer_email='olanrewajufarooq@yahoo.com',
-    description="This package provides a comprehensive description of a hexacopter, including URDF models, meshes, and configuration files necessary for simulation and visualization. It supports integration with both RViz and Gazebo environments.",
-    license='TODO: License declaration',
+    description='Hexacopter variable tilt description and simulation launch',
+    license='MIT',
+    # tests_require=['pytest'],
     entry_points={
-        'console_scripts': [
-        ],
+        'console_scripts': [],
     },
 )

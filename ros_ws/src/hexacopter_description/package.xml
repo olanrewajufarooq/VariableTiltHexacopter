@@ -3,14 +3,15 @@
 <package format="3">
   <name>hexacopter_description</name>
   <version>0.1.0</version>
-  <description>
-    This package provides a comprehensive description of a hexacopter, 
-    including URDF models, meshes, and configuration files necessary for 
-    simulation and visualization. 
-    It supports integration with both RViz and Gazebo environments.
-  </description>
+  <description>Hexacopter variable tilt description package</description>
   <maintainer email="olanrewajufarooq@yahoo.com">Farooq Olanrewaju</maintainer>
-  <license>TODO: License declaration</license>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <exec_depend>ros_gz_sim</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>xacro</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

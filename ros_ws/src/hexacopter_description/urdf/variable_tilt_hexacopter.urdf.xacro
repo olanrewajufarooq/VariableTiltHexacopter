@@ -6,12 +6,12 @@
   ====================== -->
 
   <!-- Base Dimensions and Parameters -->
-  <xacro:property name="base_mass"    value="4.253"/>
-  <xacro:property name="base_ixx"     value="0.1174"/>
-  <xacro:property name="base_iyy"     value="0.2322"/>
-  <xacro:property name="base_izz"     value="4.253"/>
+  <xacro:property name="base_mass"    value="1.5640"/>
+  <xacro:property name="base_ixx"     value="0.1"/>
+  <xacro:property name="base_iyy"     value="0.1"/>
+  <xacro:property name="base_izz"     value="0.1"/>
   <xacro:property name="base_radius"  value="0.071"/>
-  <xacro:property name="base_length"  value="0.025"/>
+  <xacro:property name="base_length"  value="0.050"/>
 
   <!-- Base Link -->
   <link name="base">
@@ -36,20 +36,17 @@
   <!-- ======================
        2. Landing Gear
   ====================== -->
-  <!-- Properties for gear leg and skid dimensions -->
   <xacro:property name="gear_leg_length"      value="0.1"/>
   <xacro:property name="gear_leg_radius"      value="0.01"/>
   <xacro:property name="gear_skid_length"     value="0.3"/>
   <xacro:property name="gear_skid_width"      value="0.02"/>
   <xacro:property name="gear_skid_thickness"  value="0.01"/>
 
-  <!-- Macro: one vertical leg + one horizontal skid -->
   <xacro:macro name="landing_gear" params="gear_name x y">
     <!-- Vertical leg link -->
     <link name="gear_leg_${gear_name}">
       <inertial>
         <mass value="0.1"/>
-        <!-- Center of mass at mid-height of the leg -->
         <origin xyz="0 0 -${gear_leg_length/2}"/>
         <inertia ixx="0.0001" iyy="0.0001" izz="0.0001"
                  ixy="0" ixz="0" iyz="0"/>
@@ -71,8 +68,6 @@
     <joint name="joint_gear_leg_${gear_name}" type="fixed">
       <parent link="base"/>
       <child link="gear_leg_${gear_name}"/>
-      <!-- Attaching the leg to the base at (x, y, 0). 
-           Adjust Z here if you want the gear further below or above the base. -->
       <origin xyz="${x} ${y} 0"/>
     </joint>
 
@@ -85,7 +80,6 @@
                  ixy="0" ixz="0" iyz="0"/>
       </inertial>
       <visual>
-        <!-- Place the skid at the bottom of the leg (Z offset = -gear_leg_length) -->
         <origin xyz="0 0 -${gear_leg_length}"/>
         <geometry>
           <box size="${gear_skid_length} ${gear_skid_width} ${gear_skid_thickness}"/>
@@ -113,20 +107,25 @@
   <!-- ======================
        3. Arm + Motor Properties
   ====================== -->
-  <!-- Arm Properties -->
-  <xacro:property name="arm_mass"    value="4.253"/>
-  <xacro:property name="arm_ixx"     value="0.1174"/>
-  <xacro:property name="arm_iyy"     value="0.2322"/>
-  <xacro:property name="arm_izz"     value="4.253"/>
+  <xacro:property name="arm_mass"    value="0.16"/>
+  <xacro:property name="arm_ixx"     value="0.01"/>
+  <xacro:property name="arm_iyy"     value="0.01"/>
+  <xacro:property name="arm_izz"     value="0.01"/>
   <xacro:property name="arm_length"  value="0.229"/>
-  <xacro:property name="arm_radius"  value="0.01"/>
+  <xacro:property name="arm_radius"  value="0.02"/>
 
-  <!-- Motor Properties -->
+  <xacro:property name="motor_mass" value="0.0880"/>
+  <xacro:property name="motor_ixx"  value="0.01"/>
+  <xacro:property name="motor_iyy"  value="0.01"/>
+  <xacro:property name="motor_izz"  value="0.01"/>
   <xacro:property name="motor_radius" value="0.02"/>
-  <xacro:property name="motor_height" value="0.02"/>
+  <xacro:property name="motor_height" value="0.05"/>
 
-  <!-- Propeller Properties -->
-  <xacro:property name="prop_box_length"    value="0.3"/>
+  <xacro:property name="prop_box_mass"    value="0.0240"/>
+  <xacro:property name="prop_box_ixx"     value="0.01"/>
+  <xacro:property name="prop_box_iyy"     value="0.01"/>
+  <xacro:property name="prop_box_izz"     value="0.01"/>
+  <xacro:property name="prop_box_length"    value="0.225"/>
   <xacro:property name="prop_box_width"     value="0.02"/>
   <xacro:property name="prop_box_thickness" value="0.01"/>
   <xacro:property name="prop_offset_z"      value="0.02"/>
@@ -134,7 +133,6 @@
   <!-- ======================
        4. Macro: Arm + Motor
   ====================== -->
-
   <xacro:macro name="arm_motor" params="arm_name x y z rpy">
     <link name="arm_${arm_name}">
       <inertial>
@@ -157,13 +155,23 @@
       </collision>
     </link>
 
-    <joint name="joint_arm_${arm_name}" type="fixed">
+    <!-- Revolute joint to allow arm to rotate for tilt -->
+    <joint name="joint_arm_${arm_name}" type="revolute">
       <parent link="base"/>
       <child link="arm_${arm_name}"/>
       <origin xyz="${x} ${y} ${z}" rpy="${rpy}"/>
+      <axis xyz="1 0 0"/>
+      <limit lower="-1.57" upper="1.57" effort="5" velocity="2.0"/>
     </joint>
 
+    <!-- Motor (Fixed to Arm) -->
     <link name="motor_${arm_name}">
+      <inertial>
+        <mass value="${motor_mass}"/>
+        <origin xyz="0 0 0"/>
+        <inertia ixx="${motor_ixx}" iyy="${motor_iyy}" izz="${motor_izz}"
+                 ixy="0" ixz="0" iyz="0"/>
+      </inertial>
       <visual>
         <origin xyz="0 0 0"/>
         <geometry>
@@ -178,12 +186,11 @@
       </collision>
     </link>
 
-    <joint name="joint_motor_${arm_name}" type="revolute">
+    <!-- Fixed motor joint (no rotation with arm) -->
+    <joint name="joint_motor_${arm_name}" type="fixed">
       <parent link="arm_${arm_name}"/>
       <child link="motor_${arm_name}"/>
       <origin xyz="${arm_length/2 - motor_radius} 0 ${arm_radius}"/>
-      <axis xyz="1 0 0"/>
-      <limit lower="-1.57" upper="1.57" effort="5" velocity="2.0"/>
     </joint>
   </xacro:macro>
 
@@ -192,6 +199,12 @@
   ====================== -->
   <xacro:macro name="propeller" params="prop_name motor_link">
     <link name="prop_${prop_name}">
+      <inertial>
+        <mass value="${prop_box_mass}"/>
+        <origin xyz="0 0 ${prop_offset_z}"/>
+        <inertia ixx="${prop_box_ixx}" iyy="${prop_box_iyy}" izz="${prop_box_izz}"
+                 ixy="0" ixz="0" iyz="0"/>
+      </inertial>
       <visual>
         <origin xyz="0 0 ${prop_offset_z}"/>
         <geometry>
@@ -234,3 +247,4 @@
   <xacro:propeller prop_name="6" motor_link="motor_6"/>
 
 </robot>
+
