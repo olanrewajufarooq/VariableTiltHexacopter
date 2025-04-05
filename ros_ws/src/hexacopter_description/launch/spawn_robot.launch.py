@@ -3,6 +3,7 @@ from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetE
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, Command
 from launch_ros.substitutions import FindPackageShare
+from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.actions import Node
 
 
@@ -31,7 +32,12 @@ def generate_launch_description():
         'variable_tilt_hexacopter.urdf.xacro'
     ])
 
-    robot_description = Command(['xacro ', xacro_file])
+    # robot_description = Command(['xacro ', xacro_file])
+    robot_description = ParameterValue(
+        Command(['xacro', ' ', xacro_file]),
+        value_type=str
+    )
+
 
     return LaunchDescription([
         declare_world,
@@ -55,7 +61,7 @@ def generate_launch_description():
             package='ros_gz_sim',
             executable='create',
             arguments=[
-                '-name', 'hexacopter', 
+                '-name', 'variable_tilt_hexacopter', 
                 '-topic', 'robot_description',
                 '-x', '0', '-y', '0', '-z', '1.0'
                 ],
