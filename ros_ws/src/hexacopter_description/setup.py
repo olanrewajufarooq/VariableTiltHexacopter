@@ -22,6 +22,8 @@ setup(
     license='MIT',
     # tests_require=['pytest'],
     entry_points={
-        'console_scripts': [],
+        'console_scripts': [
+            'wrench_applier = hexacopter_description.wrench_applier:main',
+        ],
     },
 )
