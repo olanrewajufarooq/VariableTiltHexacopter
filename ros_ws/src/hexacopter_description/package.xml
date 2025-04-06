@@ -7,7 +7,7 @@
   <maintainer email="olanrewajufarooq@yahoo.com">Farooq Olanrewaju</maintainer>
   <license>MIT</license>
 
-  <buildtool_depend>ament_python</buildtool_depend>
+  <!-- <buildtool_depend>ament_python</buildtool_depend> -->
   
   <build_depend>geometry_msgs</build_depend>
   <build_depend>rclpy</build_depend>

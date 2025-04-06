@@ -11,8 +11,9 @@ setup(
     data_files=[
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
-        (os.path.join('share', package_name, 'urdf'), glob('urdf/*.xacro')),
+        (os.path.join('share', package_name, 'urdf'), glob('urdf/*.sdf')),
         (os.path.join('share', package_name, 'worlds'), glob('worlds/*.sdf')),
+        (os.path.join('share/ament_index/resource_index/packages'), ['resource/' + package_name]),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -20,7 +21,6 @@ setup(
     maintainer_email='olanrewajufarooq@yahoo.com',
     description='Hexacopter variable tilt description and simulation launch',
     license='MIT',
-    # tests_require=['pytest'],
     entry_points={
         'console_scripts': [
             'wrench_applier = hexacopter_description.wrench_applier:main',
