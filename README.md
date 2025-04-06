@@ -132,6 +132,20 @@ ros2 launch hexacopter_description spawn_robot.launch.py
 
 ---
 
+## Important Development Notes
+In developing the robots, we start by defining the ```variable_tilt_hexacopter.urdf.xacro``` file. This file is converted to URDF using:
+```
+ros2 run xacro xacro -o ../path/variable_tilt_hexacopter.urdf ../path/variable_tilt_hexacopter.urdf.xacro
+```
+
+Then, this URDF file is converted to SDF file using:
+```
+gz sdf -p ../path/variable_tilt_hexacopter.urdf > ../path/variable_tilt_hexacopter.sdf
+```
+
+> Note: You need to replace ```../path/``` with the actual path. However, if you are in the URDF folder, you can simply omit it.
+> You need to manually copy the plugins to the SDF file. It is not created automatically.
+
 ## Features & Roadmap
 
 ✅ URDF/Xacro model of the hexacopter  
