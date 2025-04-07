@@ -24,7 +24,6 @@ setup(
     license='MIT',
     entry_points={
         'console_scripts': [
-            'wrench_applier = hexacopter_description.wrench_applier:main',
             'simple_control_node = hexacopter_description.simple_control_node:main',
         ],
     },
