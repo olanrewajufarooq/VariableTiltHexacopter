@@ -285,6 +285,7 @@
     <xacro:macro name="motor_plugin" params="id joint link direction">
       <plugin name="ignition::gazebo::systems::MulticopterMotorModel"
               filename="libignition-gazebo-multicopter-motor-model-system">
+        <robotNamespace>/model/variable_tilt_hexacopter</robotNamespace>
         <jointName>${joint}</jointName>
         <linkName>${link}</linkName>
         <turningDirection>${direction}</turningDirection>
@@ -326,10 +327,10 @@
 
     <!-- Joint controller plugin -->
     <xacro:macro name="joint_controller_plugin" params="joint">
-      <plugin filename="libignition-gazebo-joint-controller-system"
-              name="ignition::gazebo::systems::JointController">
+      <plugin filename="libignition-gazebo-joint-position-controller-system"
+              name="ignition::gazebo::systems::JointPositionController">
         <joint_name>${joint}</joint_name>
-        <use_force_commands>false</use_force_commands>
+        <topic>/model/variable_tilt_hexacopter/${joint}/cmd_pos</topic>
       </plugin>
     </xacro:macro>
 
