@@ -16,7 +16,7 @@ setup(
         (os.path.join('share', package_name, 'worlds'), glob('worlds/*.sdf')),
         (os.path.join('share/ament_index/resource_index/packages'), ['resource/' + package_name]),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'rclpy', 'actuator_msgs'],
     zip_safe=True,
     maintainer='Farooq Olanrewaju',
     maintainer_email='olanrewajufarooq@yahoo.com',

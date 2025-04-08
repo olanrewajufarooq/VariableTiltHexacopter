@@ -52,7 +52,7 @@ def generate_launch_description():
     joint_bridges = [f"/model/variable_tilt_hexacopter/joint_arm_{i}/cmd_pos@std_msgs/msg/Float64]gz.msgs.Double" for i in range(1, 7)]
 
     # Add the motor speed bridge
-    motor_bridge = "/model/variable_tilt_hexacopter/command/motor_speed@ros_gz_interfaces/msg/Float32Array]gz.msgs.Float_V"
+    motor_bridge = "/model/variable_tilt_hexacopter/command/motor_speed@actuator_msgs/msg/Actuators]gz.msgs.Actuators"
 
 
     # Bridge joint commands (ROS → Gazebo)

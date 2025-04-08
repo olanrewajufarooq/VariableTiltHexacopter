@@ -3,7 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float64
-from ros_gz_interfaces.msg import Float32Array
+from actuator_msgs.msg import Actuators
 
 class SimpleControlNode(Node):
     def __init__(self):
@@ -28,7 +28,7 @@ class SimpleControlNode(Node):
             for j in self.joint_names
         ]
 
-        self.motor_pub = self.create_publisher(Float32Array, "/model/variable_tilt_hexacopter/command/motor_speed", 10)
+        self.motor_pub = self.create_publisher(Actuators, "/model/variable_tilt_hexacopter/command/motor_speed", 10)
 
         # Timer to send at 10 Hz
         self.timer = self.create_timer(0.1, self.send_control_signals)
@@ -41,8 +41,8 @@ class SimpleControlNode(Node):
             pub.publish(msg)
 
         # Publish motor speeds
-        motor_msg = Float32Array()
-        motor_msg.data = list(self.motor_speeds)
+        motor_msg = Actuators()
+        motor_msg.velocity = list(self.motor_speeds)
         self.motor_pub.publish(motor_msg)
 
         self.get_logger().info(f"Published angles: {list(self.angles)}, motor_speeds: {list(self.motor_speeds)}")
