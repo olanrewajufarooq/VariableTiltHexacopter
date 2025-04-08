@@ -50,6 +50,10 @@ This repository contains a **Simscape/Simulink model** and a **ROS2 Gazebo simul
 
 Start with running: ` sudo apt-get update `
 
+- **ROS Gazebo**: needed to run gazebo from ROS
+   ```
+   sudo apt-get install ros-humble-ros-gz
+   ```
 - **ROS Gazebo Bridge**: Needed to use Gazebo from ROS.  
    ```
    sudo apt-get install ros-humble-ros-ign-bridge
@@ -125,14 +129,29 @@ Start with running: ` sudo apt-get update `
 build-hexacopter
 ```
 
-### 2. Launch the hexacopter in Gazebo Fortress
+### 2. Source the workspace
 ```bash
-ros2 launch hexacopter_description spawn_robot.launch.py
+src-hexacopter
 ```
+
+### 3. Launch the hexacopter in Gazebo Fortress
+
+- Just Launch the Robot in an Empty world:
+   ```bash
+   ros2 launch hexacopter_description spawn_robot.launch.py
+   ```
+
+- Launch the robot with simple fixed open-loop control. angles - tilt angles in rad. motor_speeds - propeller motor speeds in rad/s.
+   ```bash
+   ros2 launch hexacopter_description simple_control.launch.py angles:="[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]" motor_speeds:="[800.0, 800.0, 800.0, 800.0, 800.0, 800.0]"
+
+   ```
 
 ---
 
 ## Important Development Notes
+
+### Creating SDF file from URDF Xacro.
 In developing the robots, we start by defining the ```variable_tilt_hexacopter.urdf.xacro``` file. This file is converted to URDF using:
 ```
 ros2 run xacro xacro -o ../path/variable_tilt_hexacopter.urdf ../path/variable_tilt_hexacopter.urdf.xacro
@@ -143,8 +162,10 @@ Then, this URDF file is converted to SDF file using:
 gz sdf -p ../path/variable_tilt_hexacopter.urdf > ../path/variable_tilt_hexacopter.sdf
 ```
 
-> Note: You need to replace ```../path/``` with the actual path. However, if you are in the URDF folder, you can simply omit it.
-> You need to manually copy the plugins to the SDF file. It is not created automatically.
+> Note: You need to replace ```../path/``` with the actual path. However, if you are in the URDF folder, you can simply omit it.  
+> *You need to **manually copy the plugins** to the SDF file.* It is not created automatically.
+
+---
 
 ## Features & Roadmap
 
