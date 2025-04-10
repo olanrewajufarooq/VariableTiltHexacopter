@@ -63,13 +63,38 @@ class ControlAllocationNode(Node):
     def compute_allocation_matrix(self, tilt_angles):
         l = self.arm_length
         gamma = self.k_drag_to_thrust
-        sigmas = self.motor_directions
 
-        # TODO: Implement the allocation matrix computation based on the tilt angles
-        A = np.zeros((6, 6))
-
-        # return A
-        raise NotImplementedError("Allocation matrix computation is not implemented yet.")
+        alpha = np.deg2rad(tilt_angles)
+        
+	M = np.zeros((6, 6))
+	    
+	for i in range(6):
+		psi = i * (2 * np.pi / 6)
+		sigma_i = (-1) ** (i + 1)
+		alpha_i = alpha * (-1) ** (i + 1)
+		
+		# Orientation vector u_i
+		u_i = np.array([
+		     np.sin(psi) * np.sin(alpha_i),
+		    -np.cos(psi) * np.sin(alpha_i),
+		     np.cos(alpha_i)
+		])
+		
+		# Displacement vector xi_i
+		xi_i = np.array([l * np.cos(psi), l * np.sin(psi), 0])
+		
+		# Cross product ξ_i ∧ u_i
+		xi_cross_u_i = np.cross(xi_i, u_i)
+		
+		# Column M_i = [γσ_i u_i + ξ_i ∧ u_i; u_i]
+		M_i_top = gamma * sigma_i * u_i + xi_cross_u_i
+		M_i = np.concatenate([M_i_top, u_i])
+		
+		M[:, i] = M_i
+	    
+	return M
+        
+     raise NotImplementedError("Allocation matrix computation is not implemented yet.")
 
     def wrench_callback(self, msg: Wrench):
         # Desired wrench: [Fz, Tx, Ty, Tz]
