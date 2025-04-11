@@ -144,8 +144,24 @@ src-hexacopter
 - Launch the robot with simple fixed open-loop control. angles - tilt angles in rad. motor_speeds - propeller motor speeds in rad/s.
    ```bash
    ros2 launch hexacopter_description simple_control.launch.py angles:="[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]" motor_speeds:="[800.0, 800.0, 800.0, 800.0, 800.0, 800.0]"
-
    ```
+
+- Launch the robot with simple hover control.  
+   - allocation_method - control allocation method (fixed_tilt or variable_tilt).  
+   - tilt_angle - tilt angle of the rotors for fixed tilt in radians (one value for all).  
+   - hover_altitude -  
+   - hover_gain -  
+   Use any of the following commands:
+   ```bash
+   ros2 launch hexacopter_description hover_control.launch.py hover_altitude:=5.0 hover_gain:=12.0
+   ```
+   ```bash
+   ros2 launch hexacopter_description hover_control.launch.py allocation_method:="fixed_tilt" tilt_angle:="0.52"
+   ```
+   ```bash
+   ros2 launch hexacopter_description hover_control.launch.py hover_altitude:=5.0 hover_gain:=12.0 allocation_method:="fixed_tilt" tilt_angle:="0.52"
+   ```
+
 
 ---
 
@@ -163,21 +179,28 @@ gz sdf -p ../path/variable_tilt_hexacopter.urdf > ../path/variable_tilt_hexacopt
 ```
 
 > Note: You need to replace ```../path/``` with the actual path. However, if you are in the URDF folder, you can simply omit it.  
-> *You need to **manually copy the plugins** to the SDF file.* It is not created automatically.
+> *You need to **manually copy the plugins** to the SDF file from the URDF file.* It is not created automatically.
 
 ---
 
 ## Features & Roadmap
 
 ✅ URDF/Xacro model of the hexacopter  
-✅ ROS2 launch integration with Gazebo Fortress  
-✅ World environments: `empty.sdf`, `warehouse.sdf`  
-
-🚧 In Development / Planned:
-- ROS2 nodes for tilt control and flight dynamics
-- Sensor plugins (IMU, camera, lidar)
-- Teleop via joystick/keyboard
-- RViz integration and visualization enhancements
+✅ ROS2 integration with Gazebo Harmonic  
+✅ Simple world environment: `empty.sdf`
+✅ ROS2 nodes for tilt control and motor commands
+⬜ GUI for Control
+✅ Control Allocation (Simple Fixed Tilt)
+⬜ Control Allocation (Fixed Tilt with Constraints)
+⬜ Control Allocation (Variable Tilt)
+✅ Open Loop: Hover Control
+⬜ Geometric-based Control
+⬜ Complex world environments
+⬜ Trajectory Planning
+⬜ Integrate sensor plugins (IMU, camera, lidar)
+⬜ State Estimation and Mapping
+⬜ Extend to Floating-Base Manipulators
+⬜ ... New Improvements
 
 ---
 
