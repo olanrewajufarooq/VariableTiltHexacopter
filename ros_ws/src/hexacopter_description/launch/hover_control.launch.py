@@ -55,7 +55,7 @@ def generate_launch_description():
     spawn_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(spawn_launch_file),
         launch_arguments={'start_pos': PythonExpression([
-            "'0.0 0.0 ' + str(", LaunchConfiguration('hover_altitude'), ")"
+            "'0.0 0.0 ' + str(", LaunchConfiguration('hover_altitude'), ")" # spawning at hover altitude
         ])}.items(),
     )
 
@@ -72,16 +72,6 @@ def generate_launch_description():
         executable='control_allocation_node',
         output='screen',
         parameters=[control_allocation_params],
-    )
-
-    delayed_controller_node = TimerAction(
-        period=5.0,
-        actions=[controller_node]
-    )
-
-    delayed_control_allocation_node = TimerAction(
-        period=5.0,
-        actions=[control_allocation_node]
     )
 
     # Generate joint bridge arguments using a loop
@@ -106,8 +96,6 @@ def generate_launch_description():
         declare_hover_altitude,
         declare_hover_gain,
         spawn_launch,
-        # delayed_controller_node,
-        # delayed_control_allocation_node,
         controller_node,
         control_allocation_node,
         bridge_commands,

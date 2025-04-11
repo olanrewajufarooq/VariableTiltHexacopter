@@ -1,20 +1,23 @@
-hexacopter_params:
+control_allocation_node:
   ros__parameters:
-    # simulation parameters
-    gravity: 9.81  # m/s²
-    
-    # Mass and Inertia 
-    mass: 3.2  # kg
-    inertia: [0.02, 0.02, 0.04, 0.00, 0.00, 0.00]  # kg·m² (Ixx, Iyy, Izz, Ixy, Ixz, Iyz)
-
-    # Motor parameters
-    arm_length: 0.25  # meters
+    arm_length: 0.229  # meters
     k_thrust: 0.000918  # N/(rad/s)^2
-    k_drag_to_thrust: 8.06428e-05  # N·s/m
-    motor_directions: [1, -1, 1, -1, 1, -1]  # Motor direction for each motor, 1 for clockwise, -1 for counter-clockwise
-
-    # Motor Speed Limits
-    max_motor_speed: 800.0  # rad/s
+    k_drag_to_thrust: 0.016  # N·s/m # Moment Constant in the plugin.
+    motor_directions: [-1, 1, -1, 1, -1, 1]  # Motor direction for each motor, 1 for clockwise, -1 for counter-clockwise
+    max_motor_speed: 1000.0  # rad/s
     min_motor_speed: 0.0  # rad/s
-    max_tilt_angle: 0.5235987756  # radians (30 degrees)
-    min_tilt_angle: -0.5235987756  # radians (-30 degrees)
+    max_tilt_angle: 1.57  # radians (30 degrees)
+    min_tilt_angle: -1.57  # radians (-30 degrees)
+    allocation_method: 'fixed_tilt' # Options: fixed_tilt, variable_tilt
+    tilt_angle: 0.57  # radians (if using fixed_tilt)
+
+hover_openloop_control_node:
+  ros__parameters:
+    gravity: 9.81  # m/s²
+    mass: 3.596  # kg
+    hover_altitude: 5 # meters
+    hover_gain: 12.0  # Gain for hover error correction
+
+other_params:
+  ros__parameters:
+    inertia: [0.02, 0.02, 0.04, 0.00, 0.00, 0.00]  # kg·m² (Ixx, Iyy, Izz, Ixy, Ixz, Iyz)

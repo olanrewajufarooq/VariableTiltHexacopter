@@ -6,37 +6,36 @@ from geometry_msgs.msg import Wrench
 from actuator_msgs.msg import Actuators
 from std_msgs.msg import Float64
 import numpy as np
-from scipy.optimize import lsq_linear
 
 class ControlAllocationNode(Node):
     def __init__(self):
         super().__init__('control_allocation_node')
 
         # Control Allocation Parameters
-        self.declare_parameter('allocation_method') # 'fixed_tilt', 'variable_tilt'
-        self.declare_parameter('tilt_angle')  # radians
+        self.declare_parameter('allocation_method', 'fixed_tilt') # 'fixed_tilt', 'variable_tilt'
+        self.declare_parameter('tilt_angle', 0.5235)  # radians
 
         self.allocation_method = self.get_parameter('allocation_method').get_parameter_value().string_value
         self.tilt_angle = self.get_parameter('tilt_angle').get_parameter_value().double_value
 
-        self.tilt_default_angle = 0.0 # radians, defaults to this value if allocation matrix is rank deficient
+        self.tilt_default_angle = 0.5235 # radians, defaults to this value if allocation matrix is rank deficient
 
         # Motor Parameters
 
-        self.declare_parameter('k_thrust')  # N/(rad/s)^2
-        self.declare_parameter('k_drag_to_thrust')  # N*m/(rad/s)^2
-        self.declare_parameter('arm_length')  # m
-        self.declare_parameter('motor_directions') 
+        self.declare_parameter('k_thrust', 0.000918)  # N/(rad/s)^2
+        self.declare_parameter('k_drag_to_thrust', 8.06428e-05)  # N*m/(rad/s)^2
+        self.declare_parameter('arm_length', 0.229)  # m
+        self.declare_parameter('motor_directions', [1, -1] * 3) 
 
-        self.declare_parameter('max_speed')  # rad/s
-        self.declare_parameter('min_speed')  # rad/s
-        self.declare_parameter('max_tilt_angle')  # radians
-        self.declare_parameter('min_tilt_angle')  # radians
+        self.declare_parameter('max_speed', 800.0)  # rad/s
+        self.declare_parameter('min_speed', 0.00)  # rad/s
+        self.declare_parameter('max_tilt_angle', 1.57)  # radians
+        self.declare_parameter('min_tilt_angle', -1.57)  # radians
 
         self.k_thrust = self.get_parameter('k_thrust').get_parameter_value().double_value
         self.k_drag_to_thrust = self.get_parameter('k_drag_to_thrust').get_parameter_value().double_value
         self.arm_length = self.get_parameter('arm_length').get_parameter_value().double_value
-        self.motor_directions = self.get_parameter('motor_directions').get_parameter_value().double_array_value
+        self.motor_directions = self.get_parameter('motor_directions').get_parameter_value().integer_array_value
 
         self.min_motor_speed = self.get_parameter('min_speed').get_parameter_value().double_value
         self.max_motor_speed = self.get_parameter('max_speed').get_parameter_value().double_value
@@ -60,16 +59,49 @@ class ControlAllocationNode(Node):
             for i in range(6)
         ]
 
+    def wrench_callback(self, msg: Wrench):
+        # Desired wrench: [Fz, Tx, Ty, Tz]
+        desired_wrench = np.array([msg.force.x, msg.force.y, msg.force.z, msg.torque.x, msg.torque.y, msg.torque.z])
+
+        try:
+            if self.allocation_method.lower() == 'fixed_tilt':
+                tilt_angles = [self.tilt_angle, -self.tilt_angle] * 3
+                thrusts = self.fixed_tilt_allocation(desired_wrench)
+            elif self.allocation_method.lower() == 'variable_tilt':
+                [thrusts, tilt_angles] = self.variable_tilt_allocation(desired_wrench)
+            else:
+                tilt_angles = [self.tilt_angle, -self.tilt_angle] * 3
+                thrusts = self.fixed_tilt_allocation(desired_wrench)
+
+            # Compute motor speeds
+            motor_speeds = self.thrust_to_motor_speeds(thrusts)
+
+            # Publish motor speeds
+            motor_msg = Actuators()
+            motor_msg.velocity = motor_speeds.tolist()
+            self.motor_pub.publish(motor_msg)
+            # self.get_logger().info(f"[{self.allocation_method.lower()}] Motor speeds: {np.round(motor_speeds, 1)}")
+
+            # Publish tilt angles
+            for i, angle in enumerate(tilt_angles):
+                tilt_msg = Float64()
+                tilt_msg.data = angle
+                self.tilt_pubs[i].publish(tilt_msg)
+            # self.get_logger().info(f"Published tilt angles: {tilt_angles}")
+
+        except Exception as e:
+            self.get_logger().error(f"Control allocation error: {str(e)}")
+
     def compute_allocation_matrix(self, tilt_angles):
         l = self.arm_length
         gamma = self.k_drag_to_thrust
-        sigmas = self.motor_directions
+        sigmas = list(self.motor_directions)
         alpha = tilt_angles
         
         A = np.zeros((6, 6))
             
         for i in range(6):
-            psi = i * (2 * np.pi / 6)
+            psi = i * (np.pi / 3)
             sigma_i = sigmas[i]
             alpha_i = alpha[i]
             
@@ -86,46 +118,13 @@ class ControlAllocationNode(Node):
             # Cross product ξ_i ∧ u_i
             xi_cross_u_i = np.cross(xi_i, u_i)
             
-            # Column M_i = [γσ_i u_i + ξ_i ∧ u_i; u_i]
-            M_i_top = gamma * sigma_i * u_i + xi_cross_u_i
-            M_i = np.concatenate([M_i_top, u_i])
+            # Column W = [γσ_i f + ξ_i ∧ f; f]
+            T = gamma * sigma_i * u_i + xi_cross_u_i
+            W = np.concatenate([u_i, T])
             
-            A[:, i] = M_i
+            A[:, i] = W
             
         return A
-
-    def wrench_callback(self, msg: Wrench):
-        # Desired wrench: [Fz, Tx, Ty, Tz]
-        desired_wrench = np.array([msg.force.x, msg.force.y, msg.force.z, msg.torque.x, msg.torque.y, msg.torque.z])
-
-        try:
-            if self.allocation_method.lower() == 'fixed_tilt':
-                tilt_angles = [self.tilt_angle] * 6
-                thrusts = self.fixed_tilt_allocation(desired_wrench)
-            elif self.allocation_method.lower() == 'variable_tilt':
-                [thrusts, tilt_angles] = self.variable_tilt_allocation(desired_wrench)
-            else:
-                tilt_angles = [self.tilt_angle] * 6
-                thrusts = self.fixed_tilt_allocation(desired_wrench)
-
-            # Compute motor speeds
-            motor_speeds = self.thrust_to_motor_speeds(thrusts)
-
-            # Publish motor speeds
-            motor_msg = Actuators()
-            motor_msg.angular_velocities = motor_speeds.tolist()
-            self.motor_pub.publish(motor_msg)
-            self.get_logger().info(f"[{self.allocation_method.lower()}] Motor speeds: {np.round(motor_speeds, 1)}")
-
-            # Publish tilt angles
-            for i, angle in enumerate(tilt_angles):
-                tilt_msg = Float64()
-                tilt_msg.data = angle
-                self.tilt_pubs[i].publish(tilt_msg)
-            self.get_logger().info(f"Published tilt angles: {tilt_angles}")
-
-        except Exception as e:
-            self.get_logger().error(f"Control allocation error: {str(e)}")
 
     def thrust_to_motor_speeds(self, thrusts):
         # Convert thrusts to motor speeds
@@ -145,15 +144,15 @@ class ControlAllocationNode(Node):
         """
 
         # Initialize fixed tilt allocation
-        tilt_angles = [self.tilt_angle] * 6
+        tilt_angles = [self.tilt_angle, -self.tilt_angle] * 3
         A = self.compute_allocation_matrix(tilt_angles)
 
         # Check rank of the allocation matrix
-        if np.linalg.matrix_rank(A) < 6:
+        if np.linalg.det(A) < 1e-6:
             self.get_logger().error(f"Allocation matrix is rank deficient, cannot compute motor speeds. Defaulting to {self.tilt_default_angle} radians.")
             self.tilt_angle = self.tilt_default_angle
             
-            tilt_angles = [self.tilt_angle] * 6
+            tilt_angles = [self.tilt_angle, -self.tilt_angle] * 3
             A = self.compute_allocation_matrix(tilt_angles)
 
         self.inv_A = np.linalg.inv(A)
