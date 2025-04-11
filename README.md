@@ -140,6 +140,10 @@ src-hexacopter
    ```bash
    ros2 launch hexacopter_description spawn_robot.launch.py
    ```
+   You can specify the start position of the robot:
+   ```bash
+   ros2 launch hexacopter_description spawn_robot.launch.py start_pos:='5.0 0.5 2.0'
+   ```
 
 - Launch the robot with simple fixed open-loop control. angles - tilt angles in rad. motor_speeds - propeller motor speeds in rad/s.
    ```bash
@@ -151,7 +155,7 @@ src-hexacopter
    - tilt_angle - tilt angle of the rotors for fixed tilt in radians (one value for all).  
    - hover_altitude -  
    - hover_gain -  
-   Use any of the following commands:
+   **Use any of the following commands:** depending on the default values you may want to override.
    ```bash
    ros2 launch hexacopter_description hover_control.launch.py hover_altitude:=5.0 hover_gain:=12.0
    ```

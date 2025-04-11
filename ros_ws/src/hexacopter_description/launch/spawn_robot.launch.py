@@ -1,11 +1,18 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
+from launch.substitutions import LaunchConfiguration, PythonExpression
 
 def generate_launch_description():
+
+    declare_start_pos = DeclareLaunchArgument(
+        'start_pos',
+        default_value='0.0 0.0 1.0',
+        description='Initial position of the hexacopter in Gazebo'
+    )
 
     # Package paths
     pkg_hex = get_package_share_directory('hexacopter_description')
@@ -21,7 +28,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
         ),
-        launch_arguments={'gz_args': f'-r -v 4 {world_path}'}.items(),
+        launch_arguments={'gz_args': f'-r {world_path}'}.items(),
     )
 
     # Spawn Robot in Gazebo
@@ -34,12 +41,12 @@ def generate_launch_description():
             '-name', 'variable_tilt_hexacopter',
             '-file', sdf_file,
             # '-topic', '/robot_description',
-            '-x', '0.0',
-            '-y', '0.0',
-            '-z', '1.0'
+            '-x', PythonExpression(["'", LaunchConfiguration('start_pos'), "'.split()[0]"]),
+            '-y', PythonExpression(["'", LaunchConfiguration('start_pos'), "'.split()[1]"]),
+            '-z', PythonExpression(["'", LaunchConfiguration('start_pos'), "'.split()[2]"]),
         ]
     )
-
+    
     # ROS-Gz Bridge (extend as needed)
     bridge = Node(
         package='ros_gz_bridge',
@@ -52,7 +59,6 @@ def generate_launch_description():
 
             # Odometry
             '/model/variable_tilt_hexacopter/odometry@nav_msgs/msg/Odometry[gz.msgs.Odometry',
-            '/model/variable_tilt_hexacopter/odometry_with_covariance@nav_msgs/msg/Odometry[gz.msgs.Odometry',
 
             # Pose (base)
             '/model/variable_tilt_hexacopter/pose@geometry_msgs/msg/PoseStamped[gz.msgs.Pose',
@@ -63,6 +69,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        declare_start_pos,
         gazebo,
         spawn_entity,
         bridge,
