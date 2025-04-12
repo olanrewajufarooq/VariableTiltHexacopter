@@ -1,0 +1,109 @@
+<sdf version="1.9">
+  <model name="arm">
+    <link name="arm_link">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0.1074 0 0.0071 0 0 0</pose>
+        <mass>0.248</mass>
+        <inertia>
+          <ixx>0.00085084</ixx>
+          <iyy>0.00087355</iyy>
+          <izz>0.00011721</izz>
+          <ixy>0</ixy>
+          <ixz>2.27e-05</ixz>
+          <iyz>0</iyz>
+        </inertia>
+      </inertial>
+
+      <collision name="arm_collision">
+        <pose>0 0 0 0 1.5708 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.229</length>
+            <radius>0.02</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <collision name="motor_collision">
+        <pose>0.0945 0 0.02 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.05</length>
+            <radius>0.02</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name="arm_visual">
+        <pose>0 0 0 0 1.5708 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.229</length>
+            <radius>0.02</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+
+      <visual name="motor_visual">
+        <pose>0.0945 0 0.02 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.05</length>
+            <radius>0.02</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <!-- Propeller link (separate for revolute joint) -->
+    <link name="prop_link">
+      <inertial>
+        <pose>0 0 0.02 0 0 0</pose>
+        <mass>0.024</mass>
+        <inertia>
+          <ixx>4.25e-06</ixx>
+          <iyy>0.00010145</iyy>
+          <izz>0.0001053</izz>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyz>0</iyz>
+        </inertia>
+      </inertial>
+      <collision name="prop_collision">
+        <pose>0 0 0.02 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.225 0.02 0.01</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="prop_visual">
+        <pose>0 0 0.02 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.225 0.02 0.01</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+
+    <!-- Joint between arm and propeller -->
+    <joint name="prop_joint" type="revolute">
+      <parent>arm_link</parent>
+      <child>prop_link</child>
+      <pose>0.0945 0 0.02 0 0 0</pose>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1e16</lower>
+          <upper>1e16</upper>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+  </model>
+</sdf>

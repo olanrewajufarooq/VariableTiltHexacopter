@@ -1,0 +1,267 @@
+<sdf version="1.9">
+  <model name="variable_tilt_hexacopter">
+    
+    <include>
+      <uri>model://base</uri>
+      <name>base</name>
+    </include>
+
+    <include>
+      <uri>model://camera</uri>
+      <name>camera</name>
+      <pose>0 0 -0.025 0 0 0</pose>
+    </include>
+
+    <joint name="joint_camera" type="fixed">
+      <parent>base::base_link</parent>
+      <child>camera::camera_link</child>
+      <pose>0 0 -0.025 0 0 0</pose>
+    </joint>
+
+    <!-- Arms -->
+    <include>
+      <uri>model://arm</uri>
+      <name>arm_1</name>
+      <pose>0.1855 0 0 0 0 0</pose>
+    </include>
+    
+    <joint name="joint_arm_1" type="fixed">
+      <parent>base::base_link</parent>
+      <child>arm_1::arm_link</child>
+      <pose>0.1855 0 0 0 0 0</pose>
+    </joint>
+
+    <include>
+      <uri>model://arm</uri>
+      <name>arm_2</name>
+      <pose>0.09275 0.160643 0 0 0 1.047</pose>
+    </include>
+
+    <joint name="joint_arm_2" type="fixed">
+      <parent>base::base_link</parent>
+      <child>arm_2::arm_link</child>
+      <pose>0.09275 0.160643 0 0 0 1.047</pose>
+    </joint>
+
+    <include>
+      <uri>model://arm</uri>
+      <name>arm_3</name>
+      <pose>-0.09275 0.160643 0 0 0 2.094</pose>
+    </include>
+
+    <joint name="joint_arm_3" type="fixed">
+      <parent>base::base_link</parent>
+      <child>arm_3::arm_link</child>
+      <pose>-0.09275 0.160643 0 0 0 2.094</pose>
+    </joint>
+
+    <include>
+      <uri>model://arm</uri>
+      <name>arm_4</name>
+      <pose>-0.1855 0 0 0 0 3.141</pose>
+    </include>
+
+    <joint name="joint_arm_4" type="fixed">
+      <parent>base::base_link</parent>
+      <child>arm_4::arm_link</child>
+      <pose>-0.1855 0 0 0 0 3.141</pose>
+    </joint>
+
+    <include>
+      <uri>model://arm</uri>
+      <name>arm_5</name>
+      <pose>-0.09275 -0.160643 0 0 0 -2.095</pose>
+    </include>
+
+    <joint name="joint_arm_5" type="fixed">
+      <parent>base::base_link</parent>
+      <child>arm_5::arm_link</child>
+      <pose>-0.09275 -0.160643 0 0 0 -2.095</pose>
+    </joint>
+
+    <include>
+      <uri>model://arm</uri>
+      <name>arm_6</name>
+      <pose>0.09275 -0.160643 0 0 0 -1.048</pose>
+    </include>
+
+    <joint name="joint_arm_6" type="fixed">
+      <parent>base::base_link</parent>
+      <child>arm_6::arm_link</child>
+      <pose>0.09275 -0.160643 0 0 0 -1.048</pose>
+    </joint>
+
+    <!-- Pluggins -->
+
+    <!-- Pose Publisher Plugin -->
+    <plugin filename="ignition-gazebo-pose-publisher-system" name="ignition::gazebo::systems::PosePublisher">
+      <publish_link_pose>true</publish_link_pose>
+      <publish_sensor_pose>true</publish_sensor_pose>
+      <publish_collision_pose>false</publish_collision_pose>
+      <publish_visual_pose>false</publish_visual_pose>
+      <publish_nested_model_pose>true</publish_nested_model_pose>
+      <publish_model_pose>false</publish_model_pose>
+      <use_pose_vector_msg>true</use_pose_vector_msg>
+      <static_publisher>true</static_publisher>
+      <static_update_frequency>100</static_update_frequency>
+    </plugin>
+    
+    <!-- Joint states plugin -->
+    <plugin filename="ignition-gazebo-joint-state-publisher-system" name="ignition::gazebo::systems::JointStatePublisher">
+      <robotNamespace>/model/variable_tilt_hexacopter</robotNamespace>
+    </plugin>
+    
+    <!-- Odometry Plugin -->
+    <plugin filename="ignition-gazebo-odometry-publisher-system" name="ignition::gazebo::systems::OdometryPublisher">
+      <dimensions>3</dimensions>
+      <odom_publish_frequency>100</odom_publish_frequency>
+    </plugin>
+    
+    <!-- Rotor Plugins -->
+    <plugin filename="libignition-gazebo-multicopter-motor-model-system" name="ignition::gazebo::systems::MulticopterMotorModel">
+      <robotNamespace>/model/variable_tilt_hexacopter</robotNamespace>
+      <jointName>arm_1::joint_prop</jointName>
+      <linkName>arm_1::prop_link</linkName>
+      <turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1000.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
+      <motorNumber>0</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <motorSpeedPubTopic>motor_speed/0</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+      <motorType>velocity</motorType>
+    </plugin>
+    
+    <plugin filename="libignition-gazebo-multicopter-motor-model-system" name="ignition::gazebo::systems::MulticopterMotorModel">
+      <robotNamespace>/model/variable_tilt_hexacopter</robotNamespace>
+      <jointName>arm_2::joint_prop</jointName>
+      <linkName>arm_2::prop_link</linkName>
+      <turningDirection>cw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1000.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
+      <motorNumber>1</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <motorSpeedPubTopic>motor_speed/1</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+      <motorType>velocity</motorType>
+    </plugin>
+    
+    <plugin filename="libignition-gazebo-multicopter-motor-model-system" name="ignition::gazebo::systems::MulticopterMotorModel">
+      <robotNamespace>/model/variable_tilt_hexacopter</robotNamespace>
+      <jointName>arm_3::joint_prop</jointName>
+      <linkName>arm_3::prop_link</linkName>
+      <turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1000.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
+      <motorNumber>2</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <motorSpeedPubTopic>motor_speed/2</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+      <motorType>velocity</motorType>
+    </plugin>
+    
+    <plugin filename="libignition-gazebo-multicopter-motor-model-system" name="ignition::gazebo::systems::MulticopterMotorModel">
+      <robotNamespace>/model/variable_tilt_hexacopter</robotNamespace>
+      <jointName>arm_4::joint_prop</jointName>
+      <linkName>arm_4::prop_link</linkName>
+      <turningDirection>cw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1000.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
+      <motorNumber>3</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <motorSpeedPubTopic>motor_speed/3</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+      <motorType>velocity</motorType>
+    </plugin>
+    
+    <plugin filename="libignition-gazebo-multicopter-motor-model-system" name="ignition::gazebo::systems::MulticopterMotorModel">
+      <robotNamespace>/model/variable_tilt_hexacopter</robotNamespace>
+      <jointName>arm_5::joint_prop</jointName>
+      <linkName>arm_5::prop_link</linkName>
+      <turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1000.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
+      <motorNumber>4</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <motorSpeedPubTopic>motor_speed/4</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+      <motorType>velocity</motorType>
+    </plugin>
+    
+    <plugin filename="libignition-gazebo-multicopter-motor-model-system" name="ignition::gazebo::systems::MulticopterMotorModel">
+      <robotNamespace>/model/variable_tilt_hexacopter</robotNamespace>
+      <jointName>arm_6::joint_prop</jointName>
+      <linkName>arm_6::prop_link</linkName>
+      <turningDirection>cw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1000.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
+      <motorNumber>5</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <motorSpeedPubTopic>motor_speed/5</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+      <motorType>velocity</motorType>
+    </plugin>
+    
+    <!-- Joint Position Control Plugins -->
+    <plugin filename="libignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>joint_arm_1</joint_name>
+      <topic>/model/variable_tilt_hexacopter/joint_arm_1/cmd_pos</topic>
+    </plugin>
+    
+    <plugin filename="libignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>joint_arm_2</joint_name>
+      <topic>/model/variable_tilt_hexacopter/joint_arm_2/cmd_pos</topic>
+    </plugin>
+    
+    <plugin filename="libignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>joint_arm_3</joint_name>
+      <topic>/model/variable_tilt_hexacopter/joint_arm_3/cmd_pos</topic>
+    </plugin>
+    
+    <plugin filename="libignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>joint_arm_4</joint_name>
+      <topic>/model/variable_tilt_hexacopter/joint_arm_4/cmd_pos</topic>
+    </plugin>
+    
+    <plugin filename="libignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>joint_arm_5</joint_name>
+      <topic>/model/variable_tilt_hexacopter/joint_arm_5/cmd_pos</topic>
+    </plugin>
+    
+    <plugin filename="libignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>joint_arm_6</joint_name>
+      <topic>/model/variable_tilt_hexacopter/joint_arm_6/cmd_pos</topic>
+    </plugin>
+
+  </model>
+</sdf>
