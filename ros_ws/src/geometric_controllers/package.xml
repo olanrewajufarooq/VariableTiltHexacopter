@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>geometric_controllers</name>
+  <version>0.0.1</version>
+  <description>Geometric Control of Variable Tilt Hexacopter</description>
+  <maintainer email="olanrewajufarooq@yahoo.com">farooq</maintainer>
+  <license>MIT</license>
+
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>rclpy</build_depend>
+  <build_depend>actuator_msgs</build_depend>
+
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>actuator_msgs</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>ros_gz_sim</exec_depend>
+
+  <build_export_depend>actuator_msgs</build_export_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
