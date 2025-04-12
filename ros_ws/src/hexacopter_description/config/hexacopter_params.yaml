@@ -1,7 +1,7 @@
 control_allocation_node:
   ros__parameters:
     arm_length: 0.229  # meters
-    k_thrust: 0.000918  # N/(rad/s)^2
+    k_thrust: 8.54858e-06  # N/(rad/s)^2
     k_drag_to_thrust: 0.016  # N·s/m # Moment Constant in the plugin.
     motor_directions: [-1, 1, -1, 1, -1, 1]  # Motor direction for each motor, 1 for clockwise, -1 for counter-clockwise
     max_motor_speed: 1000.0  # rad/s

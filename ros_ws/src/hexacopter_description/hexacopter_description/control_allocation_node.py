@@ -22,13 +22,13 @@ class ControlAllocationNode(Node):
 
         # Motor Parameters
 
-        self.declare_parameter('k_thrust', 0.000918)  # N/(rad/s)^2
-        self.declare_parameter('k_drag_to_thrust', 8.06428e-05)  # N*m/(rad/s)^2
+        self.declare_parameter('k_thrust', 8.54858e-06)  # N/(rad/s)^2
+        self.declare_parameter('k_drag_to_thrust', 0.016)  # N*m/(rad/s)^2
         self.declare_parameter('arm_length', 0.229)  # m
         self.declare_parameter('motor_directions', [1, -1] * 3) 
 
-        self.declare_parameter('max_speed', 800.0)  # rad/s
-        self.declare_parameter('min_speed', 0.00)  # rad/s
+        self.declare_parameter('max_motor_speed', 800.0)  # rad/s
+        self.declare_parameter('min_motor_speed', 0.00)  # rad/s
         self.declare_parameter('max_tilt_angle', 1.57)  # radians
         self.declare_parameter('min_tilt_angle', -1.57)  # radians
 
@@ -37,8 +37,8 @@ class ControlAllocationNode(Node):
         self.arm_length = self.get_parameter('arm_length').get_parameter_value().double_value
         self.motor_directions = self.get_parameter('motor_directions').get_parameter_value().integer_array_value
 
-        self.min_motor_speed = self.get_parameter('min_speed').get_parameter_value().double_value
-        self.max_motor_speed = self.get_parameter('max_speed').get_parameter_value().double_value
+        self.min_motor_speed = self.get_parameter('min_motor_speed').get_parameter_value().double_value
+        self.max_motor_speed = self.get_parameter('max_motor_speed').get_parameter_value().double_value
         self.min_tilt_angle = self.get_parameter('min_tilt_angle').get_parameter_value().double_value
         self.max_tilt_angle = self.get_parameter('max_tilt_angle').get_parameter_value().double_value
 
@@ -80,7 +80,7 @@ class ControlAllocationNode(Node):
             motor_msg = Actuators()
             motor_msg.velocity = motor_speeds.tolist()
             self.motor_pub.publish(motor_msg)
-            # self.get_logger().info(f"[{self.allocation_method.lower()}] Motor speeds: {np.round(motor_speeds, 1)}")
+            self.get_logger().info(f"[{self.allocation_method.lower()}] Motor speeds: {np.round(motor_speeds, 1)}")
 
             # Publish tilt angles
             for i, angle in enumerate(tilt_angles):
@@ -148,8 +148,8 @@ class ControlAllocationNode(Node):
         A = self.compute_allocation_matrix(tilt_angles)
 
         # Check rank of the allocation matrix
-        if np.linalg.det(A) < 1e-6:
-            self.get_logger().error(f"Allocation matrix is rank deficient, cannot compute motor speeds. Defaulting to {self.tilt_default_angle} radians.")
+        if np.abs(np.linalg.det(A)) < 1e-6:
+            self.get_logger().error(f"Allocation matrix is rank deficient, Det= {np.linalg.det(A)}. Cannot compute motor speeds for tilt angles: {tilt_angles}. Defaulting to {self.tilt_default_angle} radians.")
             self.tilt_angle = self.tilt_default_angle
             
             tilt_angles = [self.tilt_angle, -self.tilt_angle] * 3
