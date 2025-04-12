@@ -65,6 +65,9 @@ def generate_launch_description():
 
             # Joint states
             '/world/empty/model/variable_tilt_hexacopter/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model',
+
+            # IMU 
+            '/model/variable_tilt_hexacopter/imu@sensor_msgs/msg/Imu[gz.msgs.IMU',
         ]
     )
 
