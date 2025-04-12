@@ -59,7 +59,7 @@ def generate_launch_description():
         ])}.items(),
     )
 
-    # Define controller node (not launched yet)
+    # Define controller node
     controller_node = Node(
         package=package_name,
         executable='hover_control_node',
@@ -74,22 +74,6 @@ def generate_launch_description():
         parameters=[control_allocation_params],
     )
 
-    # Generate joint bridge arguments using a loop
-    joint_bridges = [f"/model/variable_tilt_hexacopter/joint_arm_{i}/cmd_pos@std_msgs/msg/Float64]gz.msgs.Double" for i in range(1, 7)]
-
-    # Add the motor speed bridge
-    motor_bridge = "/model/variable_tilt_hexacopter/command/motor_speed@actuator_msgs/msg/Actuators]gz.msgs.Actuators"
-
-
-    # Bridge joint commands (ROS → Gazebo)
-    bridge_commands = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        name='command_bridge',
-        output='screen',
-        arguments=joint_bridges + [motor_bridge],
-    )
-
     return LaunchDescription([
         declare_allocation_method,
         declare_tilt_angle,
@@ -98,5 +82,4 @@ def generate_launch_description():
         spawn_launch,
         controller_node,
         control_allocation_node,
-        bridge_commands,
     ])

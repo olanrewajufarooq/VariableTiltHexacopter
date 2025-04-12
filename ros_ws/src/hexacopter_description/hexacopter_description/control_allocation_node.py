@@ -80,7 +80,7 @@ class ControlAllocationNode(Node):
             motor_msg = Actuators()
             motor_msg.velocity = motor_speeds.tolist()
             self.motor_pub.publish(motor_msg)
-            self.get_logger().info(f"[{self.allocation_method.lower()}] Motor speeds: {np.round(motor_speeds, 1)}")
+            # self.get_logger().info(f"[{self.allocation_method.lower()}] Motor speeds: {np.round(motor_speeds, 1)}")
 
             # Publish tilt angles
             for i, angle in enumerate(tilt_angles):

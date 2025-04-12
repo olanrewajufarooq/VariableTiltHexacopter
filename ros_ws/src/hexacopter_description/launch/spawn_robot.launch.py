@@ -13,14 +13,13 @@ def generate_launch_description():
         default_value='0.0 0.0 1.0',
         description='Initial position of the hexacopter in Gazebo'
     )
-
+    
     # Package paths
     pkg_hex = get_package_share_directory('hexacopter_description')
     pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
-
+    
+    # SDF file path
     sdf_file = os.path.join(pkg_hex, 'urdf', 'variable_tilt_hexacopter.sdf')
-
-    # Load world
     world_path = os.path.join(pkg_hex, 'worlds', 'empty.sdf')
 
     # Gazebo Sim
@@ -28,7 +27,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
         ),
-        launch_arguments={'gz_args': f'-r {world_path}'}.items(),
+        launch_arguments={'gz_args': f'-v 4 {world_path}'}.items(),
     )
 
     # Spawn Robot in Gazebo
@@ -54,6 +53,7 @@ def generate_launch_description():
         name='hexacopter_bridge',
         output='screen',
         arguments=[
+
             # Clock
             '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
 
@@ -68,6 +68,16 @@ def generate_launch_description():
 
             # IMU 
             '/model/variable_tilt_hexacopter/imu@sensor_msgs/msg/Imu[gz.msgs.IMU',
+
+            # Image data
+            '/model/variable_tilt_hexacopter/camera@sensor_msgs/msg/Image[gz.msgs.Image',
+            '/model/variable_tilt_hexacopter/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
+
+            # Motor Speed Command
+            "/model/variable_tilt_hexacopter/command/motor_speed@actuator_msgs/msg/Actuators]gz.msgs.Actuators",
+
+            # Joint commands (ROS → Gazebo)
+            *[f"/model/variable_tilt_hexacopter/joint_arm_{i}/cmd_pos@std_msgs/msg/Float64]gz.msgs.Double" for i in range(1, 7)],
         ]
     )
 

@@ -6,8 +6,6 @@
   <description>Hexacopter variable tilt description package</description>
   <maintainer email="olanrewajufarooq@yahoo.com">Farooq Olanrewaju</maintainer>
   <license>MIT</license>
-
-  <!-- <buildtool_depend>ament_python</buildtool_depend> -->
   
   <build_depend>geometry_msgs</build_depend>
   <build_depend>rclpy</build_depend>
@@ -17,13 +15,6 @@
   <exec_depend>actuator_msgs</exec_depend>
   <exec_depend>rclpy</exec_depend>
   <exec_depend>ros_gz_sim</exec_depend>
-  <exec_depend>robot_state_publisher</exec_depend>
-  <exec_depend>xacro</exec_depend>
-
-  <test_depend>ament_copyright</test_depend>
-  <test_depend>ament_flake8</test_depend>
-  <test_depend>ament_pep257</test_depend>
-  <test_depend>python3-pytest</test_depend>
 
   <build_export_depend>actuator_msgs</build_export_depend>
 
