@@ -191,20 +191,19 @@ gz sdf -p ../path/variable_tilt_hexacopter.urdf > ../path/variable_tilt_hexacopt
 
 ✅ URDF/Xacro model of the hexacopter  
 ✅ ROS2 integration with Gazebo Harmonic  
-✅ Simple world environment: `empty.sdf`
-✅ ROS2 nodes for tilt control and motor commands
-⬜ GUI for Control
-✅ Control Allocation (Simple Fixed Tilt)
-⬜ Control Allocation (Fixed Tilt with Constraints)
-⬜ Control Allocation (Variable Tilt)
-✅ Open Loop: Hover Control
-⬜ Geometric-based Control
-⬜ Complex world environments
-⬜ Trajectory Planning
-⬜ Integrate sensor plugins (IMU, camera, lidar)
-⬜ State Estimation and Mapping
-⬜ Extend to Floating-Base Manipulators
-⬜ ... New Improvements
+✅ Simple world environment: `empty.sdf`  
+✅ ROS2 nodes for tilt control and motor commands  
+⬜ GUI for Control  
+✅ Control Allocation (Fixed Tilt)  
+⬜ Control Allocation (Variable Tilt)  
+✅ Open Loop: Hover Control  
+⬜ Geometric-based Control  
+⬜ Complex world environments  
+⬜ Trajectory Planning  
+⬜ Integrate sensor plugins (IMU, camera)  
+⬜ State Estimation and Mapping  
+⬜ Extend to Floating-Base Manipulators  
+⬜ ... New Improvements  
 
 ---
 
