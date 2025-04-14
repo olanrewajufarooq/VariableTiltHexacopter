@@ -42,7 +42,6 @@ class HoverControlNode(Node):
 
     def altitude_callback(self, msg):
         self.current_altitude = msg.pose.pose.position.z
-        self.get_logger().info(f"Current altitude: {self.current_altitude:.3f} m. Desired: {self.hover_altitude:.3f} m.")
 
     def publish_hover_wrench(self):
         wrench_msg = Wrench()

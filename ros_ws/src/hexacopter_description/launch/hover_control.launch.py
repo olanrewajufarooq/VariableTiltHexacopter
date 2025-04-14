@@ -30,8 +30,14 @@ def generate_launch_description():
 
     declare_hover_gain = DeclareLaunchArgument(
         'hover_gain',
-        default_value='1.0',  # Kp gain for hover error correction
+        default_value='12.0',  # Kp gain for hover error correction
         description='Kp gain for hover error correction'
+    )
+
+    declare_world = DeclareLaunchArgument(
+        'world',
+        default_value='empty.sdf',
+        description='World file to load in Gazebo',
     )
 
     # Paths
@@ -56,7 +62,9 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(spawn_launch_file),
         launch_arguments={'start_pos': PythonExpression([
             "'0.0 0.0 ' + str(", LaunchConfiguration('hover_altitude'), ")" # spawning at hover altitude
-        ])}.items(),
+            ]),
+            'world': LaunchConfiguration('world')
+        }.items(),
     )
 
     # Define controller node
@@ -79,6 +87,7 @@ def generate_launch_description():
         declare_tilt_angle,
         declare_hover_altitude,
         declare_hover_gain,
+        declare_world,
         spawn_launch,
         controller_node,
         control_allocation_node,

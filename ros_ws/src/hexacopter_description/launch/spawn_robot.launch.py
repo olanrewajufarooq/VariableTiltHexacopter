@@ -4,7 +4,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
-from launch.substitutions import LaunchConfiguration, PythonExpression
+from launch.substitutions import LaunchConfiguration, PythonExpression, PathJoinSubstitution
 
 def generate_launch_description():
 
@@ -13,6 +13,12 @@ def generate_launch_description():
         default_value='0.0 0.0 1.0',
         description='Initial position of the hexacopter in Gazebo'
     )
+
+    declare_world = DeclareLaunchArgument(
+        'world',
+        default_value='empty.sdf',
+        description='World file to load in Gazebo',
+    )
     
     # Package paths
     pkg_hex = get_package_share_directory('hexacopter_description')
@@ -20,14 +26,17 @@ def generate_launch_description():
     
     # SDF file path
     sdf_file = os.path.join(pkg_hex, 'urdf', 'variable_tilt_hexacopter.sdf')
-    world_path = os.path.join(pkg_hex, 'worlds', 'empty.sdf')
+    world_path = PathJoinSubstitution([pkg_hex, 'worlds', LaunchConfiguration('world')])
 
-    # Gazebo Sim
+
+    # Gazebo Simulation
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
         ),
-        launch_arguments={'gz_args': f'-v 4 {world_path}'}.items(),
+        launch_arguments={
+            'gz_args': PythonExpression(["'-v 4 ' + '", world_path, "'"])
+        }.items(),
     )
 
     # Spawn Robot in Gazebo
@@ -83,6 +92,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         declare_start_pos,
+        declare_world,
         gazebo,
         spawn_entity,
         bridge,

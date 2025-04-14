@@ -9,7 +9,7 @@ import os
 package_name = 'hexacopter_description'
 
 def generate_launch_description():
-    # Launch args
+    ## Launch args
     declare_angles = DeclareLaunchArgument(
         'angles',
         default_value='[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]',
@@ -22,13 +22,30 @@ def generate_launch_description():
         description='List of 6 motor speeds (rad/s)'
     )
 
+    # Launch Args for World and Start Position
+    declare_world = DeclareLaunchArgument(
+        'world',
+        default_value='empty.sdf',
+        description='World file to load in Gazebo',
+    )
+
+    declare_start_pos = DeclareLaunchArgument(
+        'start_pos',
+        default_value='0.0 0.0 1.0',
+        description='Initial position of the hexacopter in Gazebo'
+    )
+
     # Paths
     hex_pkg = get_package_share_directory(package_name)
     spawn_launch_file = os.path.join(hex_pkg, 'launch', 'spawn_robot.launch.py')
 
     # Include robot spawner
     spawn_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(spawn_launch_file)
+        PythonLaunchDescriptionSource(spawn_launch_file),
+        launch_arguments={
+            'world': LaunchConfiguration('world'),
+            'start_pos': LaunchConfiguration('start_pos')
+        }.items(),
     )
 
     # Define controller node (not launched yet)
@@ -67,6 +84,8 @@ def generate_launch_description():
     return LaunchDescription([
         declare_angles,
         declare_motor_speeds,
+        declare_world,
+        declare_start_pos,
         spawn_launch,
         delayed_controller_node,
         bridge_commands,
