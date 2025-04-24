@@ -89,12 +89,7 @@
               </noise>
             </z>
           </linear_acceleration>
-          <orientation>
-            <noise type="gaussian">
-              <mean>0</mean>
-              <stddev>0.001</stddev>
-            </noise>
-          </orientation>
+          <enable_orientation>true</enable_orientation>
         </imu>
         <plugin filename="ignition-gazebo-imu-system" name="ignition::gazebo::systems::Imu"/>
       </sensor>
