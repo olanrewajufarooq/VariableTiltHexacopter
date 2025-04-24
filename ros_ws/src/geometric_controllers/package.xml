@@ -11,6 +11,9 @@
   <build_depend>rclpy</build_depend>
   <build_depend>actuator_msgs</build_depend>
 
+  <depend>python3-numpy</depend>
+  <depend>python3-scipy</depend>
+
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>actuator_msgs</exec_depend>
   <exec_depend>rclpy</exec_depend>

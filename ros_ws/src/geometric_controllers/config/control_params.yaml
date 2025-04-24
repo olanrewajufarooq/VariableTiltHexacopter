@@ -1,0 +1,8 @@
+hover_control_node:
+  ros__parameters:
+    gravity: 9.81 # m/s²
+    mass: 3.65  # kg
+    hover_altitude: 5.0 # meters
+    Kxi: [0.005, 0.005, 0.1]  # Position control
+    Gp: [0.05, 0.05, 0.05]  # Attiude control
+    Kd: [0.005, 0.005, 0.01, 0.005, 0.005, 0.005]  # Velocity control
