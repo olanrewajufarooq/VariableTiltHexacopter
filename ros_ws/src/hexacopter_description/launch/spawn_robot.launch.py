@@ -35,7 +35,7 @@ def generate_launch_description():
             os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
         ),
         launch_arguments={
-            'gz_args': PythonExpression(["'-v 4 ' + '", world_path, "'"])
+            'gz_args': PythonExpression(["'-v 1 ' + '", world_path, "'"])
         }.items(),
     )
 

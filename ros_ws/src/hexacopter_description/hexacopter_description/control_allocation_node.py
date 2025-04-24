@@ -80,7 +80,6 @@ class ControlAllocationNode(Node):
             motor_msg = Actuators()
             motor_msg.velocity = motor_speeds.tolist()
             self.motor_pub.publish(motor_msg)
-            # self.get_logger().info(f"[{self.allocation_method.lower()}] Motor speeds: {np.round(motor_speeds, 1)}")
 
             # Publish tilt angles
             for i, angle in enumerate(tilt_angles):
@@ -130,7 +129,11 @@ class ControlAllocationNode(Node):
         # Convert thrusts to motor speeds
         motor_speeds = np.zeros(6)
         for i in range(6):
-            motor_speeds[i] = np.sqrt(thrusts[i] / self.k_thrust)
+            if thrusts[i] < 0:
+                # self.get_logger().error(f"Negative thrust for motor {i+1}: {thrusts[i]}. Setting to 0.")
+                motor_speeds[i] = 0
+            else:
+                motor_speeds[i] = np.sqrt(thrusts[i] / self.k_thrust)
         
         # Clip motor speeds to the limits
         motor_speeds = np.clip(motor_speeds, self.min_motor_speed, self.max_motor_speed)
