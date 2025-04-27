@@ -124,6 +124,32 @@ class ControlAllocationNode(Node):
             A[:, i] = W
             
         return A
+    
+    def compute_static_allocation_matrix(self):
+        l = self.arm_length
+        gamma = self.k_drag_to_thrust
+        sigmas = list(self.motor_directions)
+        
+        A_static = np.zeros((6, 12))
+            
+        for i in range(6):
+            psi = i * (np.pi / 3)
+            sigma_i = sigmas[i]
+            
+            # Vertical force column (cos component)
+            A_static[2, 2*i] = 1  # Force in Z direction
+            A_static[3, 2*i] = gamma * sigma_i  # Torque around X
+            A_static[4, 2*i] = l * np.sin(psi)  # Torque around Y
+            A_static[5, 2*i] = -l * np.cos(psi)  # Torque around Z
+
+            # Lateral force column (sin component)
+            A_static[0, 2*i + 1] = np.sin(psi)  # Force in X direction
+            A_static[1, 2*i + 1] = -np.cos(psi)  # Force in Y direction
+            # No torque around X from lateral thrust
+            A_static[4, 2*i + 1] = l * np.cos(psi)  # Torque around Y
+            A_static[5, 2*i + 1] = l * np.sin(psi)  # Torque around Z
+            
+        return A_static
 
     def thrust_to_motor_speeds(self, thrusts):
         # Convert thrusts to motor speeds
@@ -165,11 +191,26 @@ class ControlAllocationNode(Node):
         return thrusts
 
     def init_variable_tilt_allocation(self):
-        raise NotImplementedError("Variable tilt allocation is not implemented yet.")
-    
+        A = self.compute_static_allocation_matrix()
+        # assert np.abs(np.linalg.det(A.T @ A)) > 1e-8, f"Matrix is illconditioned. Det: {np.linalg.det(A.T @ A)}"
+
+        self.A_inv = np.linalg.pinv(A)
+
+        
     def variable_tilt_allocation(self, desired_wrench):
-        raise NotImplementedError("Variable tilt allocation is not implemented yet.")
-        # return thrusts, tilt_angles
+        thrust_comps = self.A_inv @ desired_wrench
+
+        thrusts = np.zeros(6)
+        tilt_angles = np.zeros(6)
+
+        for i in range(6):
+            Fv = thrust_comps[2*i]      # Vertical force component
+            Fl = thrust_comps[2*i + 1]  # Lateral force component
+
+            thrusts[i] = np.sqrt(Fv**2 + Fl**2)  # Rotor speed
+            tilt_angles[i] = np.arctan2(Fl, Fv)  # Tilt angle
+        
+        return thrusts, tilt_angles
 
 def main(args=None):
     rclpy.init(args=args)
