@@ -32,8 +32,14 @@ def generate_launch_description():
 
     declare_world = DeclareLaunchArgument(
         'world',
-        default_value='industrial_warehouse.sdf',
+        default_value='empty.sdf',
         description='World file to load in Gazebo',
+    )
+
+    declare_controller_type = DeclareLaunchArgument(
+        'controller_type',
+        default_value='PD',
+        description='Controller type: PD, FeedLin or Adaptive'
     )
 
     # Paths
@@ -75,7 +81,11 @@ def generate_launch_description():
         executable='hover_control_node',
         name='hover_control_node',
         output='screen',
-        parameters=[hover_control_params],
+        parameters=[hover_control_params, 
+                    {
+                        'hover_altitude': LaunchConfiguration('hover_altitude'),
+                        'controller_type': LaunchConfiguration('controller_type'),
+                    }],
     )
 
     return LaunchDescription([
@@ -83,6 +93,8 @@ def generate_launch_description():
         declare_tilt_angle,
         declare_hover_altitude,
         declare_world,
+        declare_controller_type,
+        
         spawn_launch,
         controller_node,
         control_allocation_node,

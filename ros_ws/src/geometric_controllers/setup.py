@@ -23,6 +23,7 @@ setup(
     entry_points={
         'console_scripts': [
             'hover_control_node = geometric_controllers.hover_control_node:main',
+            'path_following_node = geometric_controllers.path_following_node:main',
         ],
     },
 )

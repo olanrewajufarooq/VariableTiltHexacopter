@@ -9,7 +9,7 @@ from geometry_msgs.msg import Wrench
 from nav_msgs.msg import Odometry
 
 # Import the Controller class from the controller module
-from geometric_controllers.controller import Controller
+from geometric_controllers.controller import PDController, FeedbackLinearizedController, AdaptiveController
 
 class HoverControlNode(Node):
     def __init__(self):
@@ -17,20 +17,26 @@ class HoverControlNode(Node):
 
         # Parameters
         self.declare_parameter('mass', 3.2)  # kg
+        self.declare_parameter('I', [0.1, 0.1, 0.1, 0.1, 0.1, 0.1])  # Inertia matrix
         self.declare_parameter('gravity', 9.81)  # m/s^2
         self.declare_parameter('hover_altitude', 5.0) # m
 
-        self.declare_parameter('Kxi', [1.0, 1.0, 1.0])
-        self.declare_parameter('Gp', [1.0, 1.0, 1.0])
+        self.declare_parameter('Kp_pos', [1.0, 1.0, 1.0])
+        self.declare_parameter('Kp_att', [1.0, 1.0, 1.0])
         self.declare_parameter('Kd', [1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
 
+        self.declare_parameter('controller_type', 'PD')  # Options: 'PD', 'FeedLin' or 'Adaptive'
+
         self.mass = self.get_parameter('mass').get_parameter_value().double_value
+        self.I = self.get_parameter('I').get_parameter_value().double_array_value
         self.gravity = self.get_parameter('gravity').get_parameter_value().double_value
         self.hover_altitude = self.get_parameter('hover_altitude').get_parameter_value().double_value
 
-        self.Kxi = self.get_parameter('Kxi').get_parameter_value().double_array_value
-        self.Gp = self.get_parameter('Gp').get_parameter_value().double_array_value
+        self.Kp_pos = self.get_parameter('Kp_pos').get_parameter_value().double_array_value
+        self.Kp_att = self.get_parameter('Kp_att').get_parameter_value().double_array_value
         self.Kd = self.get_parameter('Kd').get_parameter_value().double_array_value
+
+        self.controller_type = self.get_parameter('controller_type').get_parameter_value().string_value
 
         # Defining Desired Pose in SE(3) and Desired Twist in R6
         self.H_des = np.eye(4)
@@ -42,7 +48,19 @@ class HoverControlNode(Node):
         self.V = np.zeros((6, 1))
 
         # Initialize Controller
-        self.controller = Controller(self.Gp, self.Kxi, self.Kd)
+
+        self.get_logger().info(f"Using {self.controller_type} controller")
+
+        if self.controller_type == 'PD':
+            self.controller = PDController(self.Kp_att, self.Kp_pos, self.Kd)
+        elif self.controller_type == 'FeedLin':
+            self.controller = FeedbackLinearizedController(self.Kp_att, self.Kp_pos, self.Kd, self.I)
+        elif self.controller_type == 'Adaptive':
+            self.controller = AdaptiveController(self.Kp_att, self.Kp_pos, self.Kd, self.I)
+        else:
+            self.get_logger().error(f"Unknown controller type: {self.controller_type}")
+            self.get_logger().warn("Defaulting to PD controller")
+            self.controller = PDController(self.Kp_att, self.Kp_pos, self.Kd)
 
         # Subscriber
         self.odom_sub = self.create_subscription(
@@ -59,8 +77,8 @@ class HoverControlNode(Node):
             10
         )
 
-        # Publish at 10 Hz
-        self.timer = self.create_timer(0.01, self.publish_hover_wrench)
+        # Publish at 100 Hz
+        self.timer = self.create_timer(0.001, self.publish_hover_wrench)
 
     def odom_callback(self, msg):
         # Store the current odometry information
@@ -101,12 +119,13 @@ class HoverControlNode(Node):
 
         # Create a Wrench message
         wrench_msg = Wrench()
-        wrench_msg.force.x = W[3]
-        wrench_msg.force.y = W[4]
-        wrench_msg.force.z = W[5]
+
         wrench_msg.torque.x = W[0]
         wrench_msg.torque.y = W[1]
         wrench_msg.torque.z = W[2]
+        wrench_msg.force.x = W[3]
+        wrench_msg.force.y = W[4]
+        wrench_msg.force.z = W[5]
         
         # Publish the wrench message
         self.wrench_pub.publish(wrench_msg)
