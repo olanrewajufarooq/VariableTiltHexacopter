@@ -1,8 +1,24 @@
 hover_control_node:
   ros__parameters:
     gravity: 9.81 # m/s²
-    mass: 3.65  # kg
-    hover_altitude: 5.0 # meters
-    Kxi: [0.005, 0.005, 0.1]  # Position control
-    Gp: [0.05, 0.05, 0.05]  # Attiude control
-    Kd: [0.005, 0.005, 0.01, 0.005, 0.005, 0.005]  # Velocity control
+    mass: 3.646 # kg
+    I: [0.04092, 0.04019, 0.06921, 3.646, 3.464, 3.464]  # kg*m²
+    hover_altitude: 3.0 # meters
+    controller_type: 'PD' # Options: PD, FeedLin, Adaptive
+    Kp_pos: [0., 0., 0.5]  # Position control
+    Kp_att: [0., 0., 0.]  # Attiude control
+    Kd: [0.00001, 0.00001, 0.00001, 0., 0., 0.]  # Velocity control (angular, linear)
+
+path_following_node:
+  ros__parameters:
+    gravity: 9.81 # m/s²
+    mass: 3.646  # kg
+    I: [0.04092, 0.04019, 0.06921, 3.646, 3.464, 3.464]  # kg*m²
+    controller_type: 'PD' # Options: PD, FeedLin, Adaptive
+    Kp_pos: [0.005, 0.005, 0.1]  # Position control
+    Kp_att: [0.05, 0.05, 0.05]  # Attiude control
+    Kd: [0.005, 0.005, 0.01, 0.005, 0.005, 0.005]  # Velocity control (angular, linear)
+    path: 'hover' # Options: circle, square, infinity_loop, takeoff_land, hover
+    path_scale: 30.0
+    path_period: 20.0
+    path_altitude: 5.0

@@ -22,7 +22,7 @@ class Controller:
         p_des = H_des[:3, 3].reshape(3, 1)
 
         # Calculate the error in position
-        e_p = R.T @ (p - p_des)
+        e_p = p - p_des
 
         # Calculate the error in orientation
         R_err = R_des.T @ R
