@@ -138,7 +138,10 @@ src-hexacopter
 
 ### 4. Geometric Control Demo
 - Launch the robot with simple hover control.  
-   - hover_altitude -  
+   - hover_altitude -   
+   - Kp_att - potential gain for orientation control (e.g.: "[1.0, 1.0, 1.0]")   
+   - Kp_pos - potential gain for position control (e.g.: "[1.0, 1.0, 1.0]")   
+   - Kd - derivative gain; angular first, then linear (e.g.: "[1.0, 1.0, 1.0, 5.0, 5.0, 5.0]")   
    - allocation_method - control allocation method (fixed_tilt or variable_tilt).  
    - tilt_angle - tilt angle of the rotors for fixed tilt in radians (one value for all).  
    - world - the environment of the simulation. (empty.sdf or industrial_warehouse.sdf)  
@@ -152,6 +155,9 @@ src-hexacopter
    - path_scale - path scaling factor
    - path_period - time to complete one cycle of the path
    - path_altitude - altitude of the generated path
+   - Kp_att - potential gain for orientation control (e.g.: "[1.0, 1.0, 1.0]")   
+   - Kp_pos - potential gain for position control (e.g.: "[1.0, 1.0, 1.0]")   
+   - Kd - derivative gain; angular first, then linear (e.g.: "[1.0, 1.0, 1.0, 5.0, 5.0, 5.0]")   
    - allocation_method - control allocation method (fixed_tilt or variable_tilt).  
    - tilt_angle - tilt angle of the rotors for fixed tilt in radians (one value for all).  
    - world - the environment of the simulation. (empty.sdf or industrial_warehouse.sdf)  

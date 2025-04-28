@@ -42,6 +42,24 @@ def generate_launch_description():
         description='Controller type: PD, FeedLin or Adaptive'
     )
 
+    declare_Kp_att = DeclareLaunchArgument(
+        'Kp_att',
+        default_value='[0.5, 0.5, 0.5]',
+        description='Proportional gain for attitude control'
+    )
+
+    declare_Kp_pos = DeclareLaunchArgument(
+        'Kp_pos',
+        default_value='[0.5, 0.5, 0.5]',
+        description='Proportional gain for position control'
+    )
+
+    declare_Kd = DeclareLaunchArgument(
+        'Kd',
+        default_value='[0.5, 0.5, 0.5, 0.5, 0.5, 0.5]',
+        description='Derivative gain for velocity control'
+    )
+
     # Paths
     hex_pkg = get_package_share_directory(hex_desc_pkg_name)
     ctrl_pkg = get_package_share_directory(package_name)
@@ -85,6 +103,9 @@ def generate_launch_description():
                     {
                         'hover_altitude': LaunchConfiguration('hover_altitude'),
                         'controller_type': LaunchConfiguration('controller_type'),
+                        'Kp_att': PythonExpression(LaunchConfiguration('Kp_att')),
+                        'Kp_pos': PythonExpression(LaunchConfiguration('Kp_pos')),
+                        'Kd': PythonExpression(LaunchConfiguration('Kd')),
                     }],
     )
 
@@ -94,6 +115,9 @@ def generate_launch_description():
         declare_hover_altitude,
         declare_world,
         declare_controller_type,
+        declare_Kp_att,
+        declare_Kp_pos,
+        declare_Kd,
         
         spawn_launch,
         controller_node,
