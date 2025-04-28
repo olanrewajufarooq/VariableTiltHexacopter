@@ -4,45 +4,39 @@
 
 This repository contains a **Simscape/Simulink model** and a **ROS2 Gazebo simulation setup** for a **Variable Tilt Hexacopter**, designed to simulate and analyze the dynamics and control of a hexacopter with adjustable propeller tilting angles. The project supports both offline modeling and real-time robotic simulation to facilitate research in **geometric control, flight dynamics**, and **ROS-based deployment**.
 
----
+
 
 ## Repository Structure
 
 ```plaintext
 📂 VariableTiltHexacopter
-├── 📁 matlab
-    ├── 📁 modelling_scripts/             # MATLAB scripts for modeling and analysis
-│   │   ├── 📄 compute_params.slx         # Simulink for evaluating inertia tensors
-│   │   └── 📄 fixed_wrench_analysis.mlx  # Livescript for wrench evaluation
-│   ├── 📄 param.m                        # MATLAB script for hexacopter parameters
-│   └── 📄 simulation.slx                 # Simulink model
-├── 📁 ros_ws/                            # ROS2 workspace
+├── 📁 ros_ws/                               # ROS2 workspace
 │   └── 📁 src/
 │       └── 📁 hexacopter_description/
-│           ├── 📁 launch/                # ROS2 launch files
-│           ├── 📁 resource/              # Package resources
-│           ├── 📁 scripts/               # (Planned) ROS2 nodes for control, etc.
-│           ├── 📁 urdf/                  # Xacro/URDF description of the hexacopter
-│           ├── 📁 worlds/                # Gazebo SDF environments
+│           ├── 📁 launch/                   # ROS2 launch files
+│           ├── 📁 hexacopter_description/   # ROS2 nodes, etc.
+│           ├── 📁 urdf/                     # Xacro/URDF description of the hexacopter
+│           ├── 📁 worlds/                   # Gazebo SDF environments
+│           ├── 📄 package.xml
+│           └── 📄 setup.py
+│       └── 📁 geometric_controllers/
+│           ├── 📁 launch/                   # ROS2 launch files
+│           ├── 📁 geometric_controllers/    # Python files and ROS2 nodes for control, etc.
 │           ├── 📄 package.xml
 │           └── 📄 setup.py
 ├── .gitignore
 └── README.md
 ```
 
----
+
 
 ## Getting Started
 
 ### Prerequisites
 
-#### MATLAB Simulation
-- **MATLAB & Simulink** (R2021b or later recommended)
-- **Simscape Multibody**
-
 #### ROS2 Simulation
-- **ROS2** (e.g., Foxy, Galactic, or Humble)
-- **Gazebo Fortress/Ignition**
+- **ROS2** (Humble)
+- **Gazebo Ignition** (Harmonic)
 - **colcon** (ROS2 build tool)
 - **xacro**, `ros_ign_gazebo` plugins, and other common ROS2 packages
 
@@ -64,31 +58,7 @@ Start with running: ` sudo apt-get update `
    ```
 
 
----
 
-## MATLAB Usage
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/olanrewajufarooq/VariableTiltHexacopter.git
-   cd VariableTiltHexacopter
-   ```
-
-2. Open MATLAB and navigate to the repo folder.
-
-3. Run the parameter setup:
-   ```matlab
-   run('modelling_scripts/param.m')
-   ```
-
-4. Open and simulate the model:
-   ```matlab
-   open('modelling_scripts/simulation.slx')
-   ```
-
-   > View the physical model in Mechanics Explorer.
-
----
 
 ## ROS2 + Gazebo Usage
 
@@ -134,7 +104,7 @@ build-hexacopter
 src-hexacopter
 ```
 
-### 3. Launch the hexacopter in Gazebo Fortress
+### 3. Basic Demo: Launch the hexacopter in Gazebo Harmonic
 
 - Just Launch the Robot in an Empty world:
    ```bash
@@ -166,8 +136,32 @@ src-hexacopter
    ros2 launch hexacopter_description hover_control.launch.py hover_altitude:=5.0 hover_gain:=12.0 allocation_method:="fixed_tilt" tilt_angle:="0.52"
    ```
 
+### 4. Geometric Control Demo
+- Launch the robot with simple hover control.  
+   - hover_altitude -  
+   - allocation_method - control allocation method (fixed_tilt or variable_tilt).  
+   - tilt_angle - tilt angle of the rotors for fixed tilt in radians (one value for all).  
+   - world - the environment of the simulation. (empty.sdf or industrial_warehouse.sdf)  
+   **Use any of the following commands:** you may add more parameters to override the default.
+   ```bash
+   ros2 launch geometric_controllers hover_control.launch.py hover_altitude:=5.0
+   ```
 
----
+- Launch the robot with trajectory tracking. 
+   - path - path type: circle, square, infinity, takeoff_land, hover
+   - path_scale - path scaling factor
+   - path_period - time to complete one cycle of the path
+   - path_altitude - altitude of the generated path
+   - allocation_method - control allocation method (fixed_tilt or variable_tilt).  
+   - tilt_angle - tilt angle of the rotors for fixed tilt in radians (one value for all).  
+   - world - the environment of the simulation. (empty.sdf or industrial_warehouse.sdf)  
+   **Use the following commands:** you may add more parameters to override the default.
+   ```bash
+   ros2 launch geometric_controllers path_following.launch.py path:=circle
+   ```
+
+
+
 
 ## Important Development Notes
 
@@ -185,7 +179,7 @@ gz sdf -p ../path/variable_tilt_hexacopter.urdf > ../path/variable_tilt_hexacopt
 > Note: You need to replace ```../path/``` with the actual path. However, if you are in the URDF folder, you can simply omit it.  
 > *You need to **manually copy the plugins** to the SDF file from the URDF file.* It is not created automatically.
 
----
+
 
 ## Features & Roadmap
 
@@ -197,21 +191,29 @@ gz sdf -p ../path/variable_tilt_hexacopter.urdf > ../path/variable_tilt_hexacopt
 ✅ Control Allocation (Fixed Tilt)  
 ⬜ Control Allocation (Variable Tilt)  
 ✅ Open Loop: Hover Control  
-⬜ Geometric-based Control  
-⬜ Complex world environments  
+✅ Geometric-based Control: PD Control   
+⬜ Geometric-based Control: Feedback Linearized Control   
+⬜ Geometric-based Control: Adaptive Control   
+✅ Realistic world environments  
 ⬜ Trajectory Planning  
-⬜ Integrate sensor plugins (IMU, camera)  
+✅ Integrate sensor plugins (IMU, camera)  
 ⬜ State Estimation and Mapping  
 ⬜ Extend to Floating-Base Manipulators  
 ⬜ ... New Improvements  
 
----
+
 
 ## Contributing
 
 Feel free to fork this repo and contribute via pull requests. Open issues for bugs, feature suggestions, or integration help.
 
----
+
+
+## Troubleshooting
+
+- One common error when bypassing the default parameters when launching from terminal is type error. Although the error message usually doesn't make this apparent. Ensure that parameters are given correct type. For a double type for example, `0` will not be accepted, rather, it should be `0.0`.
+
+
 
 ## License
 
