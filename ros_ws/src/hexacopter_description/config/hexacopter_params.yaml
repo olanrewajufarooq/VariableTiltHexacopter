@@ -8,15 +8,11 @@ control_allocation_node:
     min_motor_speed: 0.0  # rad/s
     max_tilt_angle: 1.57  # radians (30 degrees)
     min_tilt_angle: -1.57  # radians (-30 degrees)
-    allocation_method: 'fixed_tilt' # Options: fixed_tilt, variable_tilt
-    tilt_angle: 0.57  # radians (if using fixed_tilt)
 
 hover_openloop_control_node:
   ros__parameters:
     gravity: 9.81  # m/s²
     mass: 3.596  # kg
-    hover_altitude: 5 # meters
-    hover_gain: 12.0  # Gain for hover error correction
 
 other_params:
   ros__parameters:
