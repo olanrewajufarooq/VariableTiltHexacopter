@@ -55,19 +55,19 @@ def generate_launch_description():
 
     declare_Kp_att = DeclareLaunchArgument(
         'Kp_att',
-        default_value='[0.5 0.5 0.5]',
+        default_value='[0.5, 0.5, 0.5]',
         description='Proportional gain for attitude control'
     )
 
     declare_Kp_pos = DeclareLaunchArgument(
         'Kp_pos',
-        default_value='[0.5 0.5 0.5]',
+        default_value='[0.1, 0.1, 0.5]',
         description='Proportional gain for position control'
     )
 
     declare_Kd = DeclareLaunchArgument(
         'Kd',
-        default_value='[0.5 0.5 0.5 0.5 0.5 0.5]',
+        default_value='[0.0, 0.0, 0.0, 0.0, 0.0, 0.5]',
         description='Derivative gain for velocity control'
     )
 
@@ -113,7 +113,7 @@ def generate_launch_description():
         parameters=[control_params, {
             'path': LaunchConfiguration('path'),
             'path_scale': LaunchConfiguration('path_scale'),
-            'path_speed': LaunchConfiguration('path_speed'),
+            'path_period': LaunchConfiguration('path_period'),
             'path_altitude': LaunchConfiguration('path_altitude'),
             'controller_type': LaunchConfiguration('controller_type'),
             'Kp_att': PythonExpression(LaunchConfiguration('Kp_att')),
