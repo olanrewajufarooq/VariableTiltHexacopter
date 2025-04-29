@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # ──────────────── CONFIGURATION ────────────────
-WORKSPACE=~/VariableTiltHexacopter/ros_ws
-BAG_DIR=$WORKSPACE/ros_bags
+TOP_DIR=~/VariableTiltHexacopter
+WORKSPACE=$TOP_DIR/ros_ws
+BAG_DIR=$TOP_DIR/ros_bags
 
 DURATION=90            # Duration to run [seconds]
 START_SHIFT=10         # Start shift for plotting [seconds]
@@ -12,10 +13,10 @@ PATH_TYPE=hover
 CONTROLLER_TYPE=PD
 ATT="[0.5,0.5,0.5]"
 KP_POS="[0.1,0.1,2.0]"  
-KD="[0.0, =0.0,0.005,0.0,0.0,0.5]"
+KD="[0.0,0.0,0.005,0.0,0.0,0.5]"
 
 # Auto-generated names
-BAG_NAME="geometric_control_${CONTROLLER_TYPE}_${PATH_TYPE}"
+BAG_NAME="geometric_control_${CONTROLLER_TYPE}_${PATH_TYPE}_bag"
 BAG_PATH="${BAG_DIR}/${BAG_NAME}"
 PLOT_PATH="${BAG_DIR}/plot/${CONTROLLER_TYPE}_${PATH_TYPE}"
 
@@ -38,7 +39,6 @@ sleep 5
 
 # ──────────────── STEP 3: Start ROS2 Bag Recording ────────────────
 echo "🎥 Recording ROS2 bag to $BAG_PATH..."
-mkdir -p $BAG_DIR
 
 # Delete old bag folder if it exists
 if [ -d "$BAG_PATH" ]; then
