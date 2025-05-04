@@ -163,10 +163,17 @@ src-hexacopter
    - world - the environment of the simulation. (empty.sdf or industrial_warehouse.sdf)  
    **Use the following commands:** you may add more parameters to override the default.
    ```bash
-   ros2 launch geometric_controllers path_following.launch.py path:=circle
+   ros2 launch geometric_controllers path_following.launch.py path:=square
    ```
 
+### Running entire pipeline
 
+The pipeline involves: running simulation, recording ROS bags and plotting the results. The entire pipeline is implemented in the `bash_scripts` folder. To run the pipeline, simple change the `controller_type` and the `path` to the desired values in the `bash_scripts/run_all.sh` file. Then, run the code:
+
+```
+cd ~/VariableTiltHexacopter/bash_scripts   
+bash run_all.sh
+```
 
 
 ## Important Development Notes
