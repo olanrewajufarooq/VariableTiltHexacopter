@@ -28,7 +28,7 @@ def generate_launch_description():
     )
 
     declare_path_type = DeclareLaunchArgument(
-        'path', default_value='circle',
+        'path', default_value='takeoff_land',
         description='Path type: circle, square, infinity, takeoff_land, hover.'
     )
 
@@ -38,13 +38,18 @@ def generate_launch_description():
     )
 
     declare_path_period = DeclareLaunchArgument(
-        'path_period', default_value='0.5',
+        'path_period', default_value='60.0',
         description='Traversal speed along the path'
     )
 
     declare_path_altitude = DeclareLaunchArgument(
         'path_altitude', default_value='5.0',
         description='Altitude of the generated path'
+    )
+
+    declare_path_start_with_hover = DeclareLaunchArgument(
+        'path_start_with_hover', default_value='true',
+        description='Start with hover before following the path'
     )
 
     declare_controller_type = DeclareLaunchArgument(
@@ -55,19 +60,19 @@ def generate_launch_description():
 
     declare_Kp_att = DeclareLaunchArgument(
         'Kp_att',
-        default_value='[0.5, 0.5, 0.5]',
+        default_value='[5.5,5.5,5.5]',
         description='Proportional gain for attitude control'
     )
 
     declare_Kp_pos = DeclareLaunchArgument(
         'Kp_pos',
-        default_value='[0.1, 0.1, 0.5]',
+        default_value='[35.5,35.5,65.28]',
         description='Proportional gain for position control'
     )
 
     declare_Kd = DeclareLaunchArgument(
         'Kd',
-        default_value='[0.0, 0.0, 0.0, 0.0, 0.0, 0.5]',
+        default_value='[2.05,2.05,2.05,20.0,20.5,20.55]',
         description='Derivative gain for velocity control'
     )
 
@@ -115,6 +120,7 @@ def generate_launch_description():
             'path_scale': LaunchConfiguration('path_scale'),
             'path_period': LaunchConfiguration('path_period'),
             'path_altitude': LaunchConfiguration('path_altitude'),
+            'path_start_with_hover': LaunchConfiguration('path_start_with_hover'),
             'controller_type': LaunchConfiguration('controller_type'),
             'Kp_att': PythonExpression(LaunchConfiguration('Kp_att')),
             'Kp_pos': PythonExpression(LaunchConfiguration('Kp_pos')),
@@ -134,6 +140,7 @@ def generate_launch_description():
         declare_Kp_att,
         declare_Kp_pos,
         declare_Kd,
+        declare_path_start_with_hover,
 
         spawn_launch,
         control_allocation_node,

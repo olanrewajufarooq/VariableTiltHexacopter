@@ -11,9 +11,9 @@ control_allocation_node:
 
 hover_openloop_control_node:
   ros__parameters:
-    gravity: 9.81  # m/s²
-    mass: 3.596  # kg
+    gravity: 9.8  # m/s²
+    mass: 3.646  # kg
 
 other_params:
   ros__parameters:
-    inertia: [0.02, 0.02, 0.04, 0.00, 0.00, 0.00]  # kg·m² (Ixx, Iyy, Izz, Ixy, Ixz, Iyz)
+    inertia: [0.04092, 0.04019, 0.06921, 0.00005656, -0.00006494, 0.00001313]  # kg*m² ((Ixx, Iyy, Izz, Ixy, Ixz, Iyz))

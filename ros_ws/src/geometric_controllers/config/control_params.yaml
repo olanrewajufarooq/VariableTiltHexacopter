@@ -1,11 +1,13 @@
 hover_control_node:
   ros__parameters:
-    gravity: 9.81 # m/s²
+    gravity: 9.8 # m/s²
     mass: 3.646 # kg
-    I: [0.04092, 0.04019, 0.06921, 3.646, 3.464, 3.464]  # kg*m²
+    I: [0.04092, 0.04019, 0.06921, 0.00005656, -0.00006494, 0.00001313]  # kg*m² ((Ixx, Iyy, Izz, Ixy, Ixz, Iyz))
+    CoG: [0.0, 0.0, -0.0023]  # Center of Gravity in meters (x, y, z)
 
 path_following_node:
   ros__parameters:
-    gravity: 9.81 # m/s²
+    gravity: 9.8 # m/s²
     mass: 3.646  # kg
-    I: [0.04092, 0.04019, 0.06921, 3.646, 3.464, 3.464]  # kg*m²
+    I: [0.04092, 0.04019, 0.06921, 0.00005656, -0.00006494, 0.00001313]  # kg*m² ((Ixx, Iyy, Izz, Ixy, Ixz, Iyz))
+    CoG: [0.0, 0.0, -0.0023]  # Center of Gravity in meters (x, y, z)
