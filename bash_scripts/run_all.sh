@@ -5,15 +5,16 @@ TOP_DIR=~/VariableTiltHexacopter
 WORKSPACE=$TOP_DIR/ros_ws
 BAG_DIR=$TOP_DIR/ros_bags
 
-DURATION=90            # Duration to run [seconds]
-START_SHIFT=10         # Start shift for plotting [seconds]
+DURATION=30            # Duration to run [seconds]
+START_SHIFT=2         # Start shift for plotting [seconds]
 
 # Controller and Path Settings
-PATH_TYPE=hover
+PATH_TYPE=hover # Options: hover, takeoff_land, square (circle, infinite_loop not-working yet)
+PATH_PERIOD=20.0     # Path period [seconds]
 CONTROLLER_TYPE=PD
-ATT="[0.5,0.5,0.5]"
-KP_POS="[0.1,0.1,2.0]"  
-KD="[0.0,0.0,0.005,0.0,0.0,0.5]"
+KP_ATT="[5.5,5.5,5.5]"
+KP_POS="[35.5,35.5,65.28]"  
+KD="[2.05,2.05,2.05,20.0,20.5,20.55]"
 
 # Auto-generated names
 BAG_NAME="geometric_control_${CONTROLLER_TYPE}_${PATH_TYPE}_bag"
@@ -28,8 +29,9 @@ source $WORKSPACE/install/setup.bash
 echo "🚀 Launching simulation with PATH=$PATH_TYPE CONTROLLER=$CONTROLLER_TYPE..."
 ros2 launch geometric_controllers path_following.launch.py \
     path:=$PATH_TYPE \
+    path_period:=$PATH_PERIOD \
     controller_type:=$CONTROLLER_TYPE \
-    att:=$ATT \
+    Kp_att:=$KP_ATT \
     Kp_pos:=$KP_POS \
     Kd:=$KD &
 LAUNCH_PID=$!
