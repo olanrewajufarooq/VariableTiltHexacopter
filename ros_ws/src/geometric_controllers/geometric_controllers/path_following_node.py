@@ -20,33 +20,37 @@ class PathFollowingNode(Node):
         self.declare_parameter('mass', 3.2)
         self.declare_parameter('gravity', 9.81)
 
-        self.declare_parameter('Kxi', [1.0, 1.0, 1.0])
-        self.declare_parameter('Gp', [1.0, 1.0, 1.0])
+        self.declare_parameter('Kp_pos', [1.0, 1.0, 1.0])
+        self.declare_parameter('Kp_att', [1.0, 1.0, 1.0])
         self.declare_parameter('Kd', [1.0]*6)
 
         self.declare_parameter('controller_type', 'PD')  # PD, FeedLin, Adaptive
         self.declare_parameter('I', [0.1]*6)  # Inertia matrix if needed
+        self.declare_parameter('CoG', [0.0, 0.0, 0.0])  # Center of Gravity
 
         self.declare_parameter('path', 'circle')
         self.declare_parameter('path_scale', 5.0)
         self.declare_parameter('path_period', 0.5)
         self.declare_parameter('path_altitude', 5.0)
+        self.declare_parameter('path_start_with_hover', True)
 
         # ───── Load parameters ─────
         self.mass = self.get_parameter('mass').value
         self.gravity = self.get_parameter('gravity').value
 
-        self.Kxi = self.get_parameter('Kxi').value
-        self.Gp = self.get_parameter('Gp').value
+        self.Kp_pos = self.get_parameter('Kp_pos').value
+        self.Kp_att = self.get_parameter('Kp_att').value
         self.Kd = self.get_parameter('Kd').value
 
         self.controller_type = self.get_parameter('controller_type').value
         self.I = self.get_parameter('I').value
+        self.CoG = self.get_parameter('CoG').value
 
         self.path_name = self.get_parameter('path').value
         self.path_scale = self.get_parameter('path_scale').value
         self.path_period = self.get_parameter('path_period').value
         self.path_altitude = self.get_parameter('path_altitude').value
+        self.path_start_with_hover = self.get_parameter('path_start_with_hover').value
 
         # ───── Initialize state ─────
         self.H = np.eye(4)
@@ -60,17 +64,20 @@ class PathFollowingNode(Node):
 
         self.controller = Controller(
             method=self.controller_type,
-            Kp_att=self.Kxi,
-            Kp_pos=self.Gp,
+            Kp_att=self.Kp_att,
+            Kp_pos=self.Kp_pos,
             Kd=self.Kd,
-            I=self.I
+            m=self.mass,
+            I=self.I,
+            CoG=self.CoG
         )
 
         self.path_generator = PathGenerator(
             path_name=self.path_name,
             scale=self.path_scale,
             period=self.path_period,
-            altitude=self.path_altitude
+            altitude=self.path_altitude,
+            start_with_hover=self.path_start_with_hover,
         )
 
         self.get_logger().info(
@@ -112,14 +119,14 @@ class PathFollowingNode(Node):
             R_mat = R.from_quat(quat).as_matrix()
             p_vec = np.array([pos.x, pos.y, pos.z]).reshape(3,1)
 
-            v_vec = np.array([vel.x, vel.y, vel.z]).reshape(3,1)
             omega_vec = np.array([omega.x, omega.y, omega.z]).reshape(3,1)
+            v_vec = np.array([vel.x, vel.y, vel.z]).reshape(3,1)
 
             self.H = np.eye(4)
             self.H[:3,:3] = R_mat
             self.H[:3,3] = p_vec.flatten()
 
-            self.V = np.vstack((v_vec, omega_vec))
+            self.V = np.vstack((omega_vec, v_vec))
             self.odometry_received = True
 
         except Exception as e:
@@ -141,9 +148,9 @@ class PathFollowingNode(Node):
 
             # Compute wrench
             wrench = self.controller.compute_wrench(
-                self.mass, self.gravity,
-                self.H_des, self.H,
-                self.V_des, self.V
+                m=self.mass, g=self.gravity,
+                H_des=self.H_des, H=self.H,
+                V_des=self.V_des, V=self.V
             ).flatten()
 
             wrench_msg = Wrench()

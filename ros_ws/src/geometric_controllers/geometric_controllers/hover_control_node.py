@@ -17,6 +17,7 @@ class HoverControlNode(Node):
         # Declare Parameters
         self.declare_parameter('mass', 3.2)
         self.declare_parameter('I', [0.1]*6)
+        self.declare_parameter('CoG', [0, 0, 0])
         self.declare_parameter('gravity', 9.81)
         self.declare_parameter('hover_altitude', 5.0)
 
@@ -52,6 +53,7 @@ class HoverControlNode(Node):
             Kp_att=self.Kp_att,
             Kp_pos=self.Kp_pos,
             Kd=self.Kd,
+            CoG=[0, 0, 0],
             I=self.I
         )
 
