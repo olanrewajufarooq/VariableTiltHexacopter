@@ -166,7 +166,9 @@ src-hexacopter
    ros2 launch geometric_controllers path_following.launch.py path:=square
    ```
 
-### Running entire pipeline
+### Running entire pipeline (Using Single Script) 
+
+__Warning__: Not advised. It does not stop the Gazebo Simulation correctly.  
 
 The pipeline involves: running simulation, recording ROS bags and plotting the results. The entire pipeline is implemented in the `bash_scripts` folder. To run the pipeline, simple change the `controller_type` and the `path` to the desired values in the `bash_scripts/run_all.sh` file. Then, run the code:
 
@@ -174,6 +176,42 @@ The pipeline involves: running simulation, recording ROS bags and plotting the r
 cd ~/VariableTiltHexacopter/bash_scripts   
 bash run_all.sh
 ```
+
+### Running entire pipeline (In Separate Terminals)  
+
+The pipeline involves: running simulation, recording ROS bags and plotting the results. 
+- Launch Simulation
+   ```
+   src-hexacopter
+   ros2 launch geometric_controllers path_following.launch.py path:=hover path_period:=60.0
+   ```
+
+- Launch ROS Bag
+   ```
+   cd ~/VariableTiltHexacopter/ros_bags
+   ros2 bag record \
+      /model/variable_tilt_hexacopter/odometry \
+      /model/variable_tilt_hexacopter/desired_wrench \
+      /model/variable_tilt_hexacopter/plot/motor_speed \
+      /model/variable_tilt_hexacopter/plot/tilt_angle \
+      -o geometric_control_PD_square_bag
+   ```
+
+- Start Simulation
+   Press the `space bar` to quickly start the simulation. First, stop the ROS Bag by using `Ctrl + C`. Then, press `Ctrl + C` in the terminal where you launched Gazebo to simply stop the Simulation.
+
+- Plot Result
+
+   **Note**: The name of the bag (in front of the tag `-b`) must be same as the name passed as the output of the ROS Bag (in front of tag `-o`).
+
+   ```
+   cd ~/VariableTiltHexacopter/ros_bags
+   python3 plot_hexacopter.py \
+      -b geometric_control_PD_square_bag \
+      -o plot/PD_square \
+      -d 80 \
+      -s 2
+   ```
 
 
 ## Important Development Notes
