@@ -34,16 +34,23 @@ class ControlAllocationNode(Node):
         min_motor = self.get_parameter('min_motor_speed').value
 
         # Allocator setup
-        self.control_allocator = ControlAllocator(
-            method=method,
-            k_thrust=k_thrust,
-            k_drag_to_thrust=k_drag_to_thrust,
-            arm_length=l,
-            motor_directions=dirs,
-            min_motor_speed=min_motor,
-            max_motor_speed=max_motor,
-            tilt_angle=tilt_angle
-        )
+        allocator_args = {
+            'method': method,
+            'k_thrust': k_thrust,
+            'k_drag_to_thrust': k_drag_to_thrust,
+            'arm_length': l,
+            'motor_directions': dirs,
+            'min_motor_speed': min_motor,
+            'max_motor_speed': max_motor,
+        }
+
+        if method == 'fixed_tilt':
+            allocator_args['tilt_angle'] = tilt_angle
+        elif method == 'optimized':
+            allocator_args['tilt_bounds'] = [-np.pi, np.pi]
+
+        self.control_allocator = ControlAllocator(**allocator_args)
+        self.get_logger().info(f"Control allocator initialized with method: {method}")
 
         # ROS interfaces
         self.wrench_sub = self.create_subscription(Wrench,
@@ -73,8 +80,7 @@ class ControlAllocationNode(Node):
 
         try:
             # Allocate thrusts and tilt angles
-            thrusts, tilt_angles = self.control_allocator.allocate(wrench)
-            motor_speeds = self.control_allocator.thrust_to_motor_speeds(thrusts)
+            motor_speeds, tilt_angles = self.control_allocator.allocate(wrench)
 
             # ROS Publishing
             motor_msg = Actuators()

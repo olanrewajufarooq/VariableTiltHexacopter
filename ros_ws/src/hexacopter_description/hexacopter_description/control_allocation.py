@@ -1,5 +1,6 @@
 import numpy as np
 from abc import ABC, abstractmethod
+from scipy.optimize import minimize, differential_evolution, NonlinearConstraint
 
 # ─────────────────────────────────────────────
 # Base abstract class
@@ -53,7 +54,8 @@ class FixedTiltAllocator(BaseAllocator):
 
     def allocate(self, desired_wrench):
         thrusts = self.inv_A @ desired_wrench
-        return thrusts, self.tilt_angles
+        motor_speeds = self.thrust_to_motor_speeds(thrusts)
+        return motor_speeds, self.tilt_angles
 
     def _compute_allocation_matrix(self, tilt_angles):
         l = self.arm_length
@@ -86,7 +88,7 @@ class VariableTiltAllocator(BaseAllocator):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.A_inv = None
-        self.initialize()  # ✅ automatic inside subclass
+        self.initialize() 
 
     def initialize(self):
         A = self._compute_static_allocation_matrix()
@@ -102,8 +104,10 @@ class VariableTiltAllocator(BaseAllocator):
             Fl = thrust_comps[2*i + 1]
             thrusts[i] = np.sqrt(Fv**2 + Fl**2)
             tilt_angles[i] = np.arctan2(Fl, Fv)
+        
+        motor_speeds = self.thrust_to_motor_speeds(thrusts)
 
-        return thrusts, tilt_angles
+        return motor_speeds, tilt_angles
 
     def _compute_static_allocation_matrix(self):
         l = self.arm_length
@@ -126,6 +130,84 @@ class VariableTiltAllocator(BaseAllocator):
             A[5, 2*i + 1] = l * np.sin(psi)
 
         return A
+    
+# ─────────────────────────────────────────────
+# Optimized Allocator
+# ─────────────────────────────────────────────
+
+class OptimizedAllocator(BaseAllocator):
+    def __init__(self, tilt_bounds=(-np.pi, np.pi), *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.tilt_bounds = tilt_bounds
+        self.initialize()
+
+    def initialize(self):
+        self.motor_speed_bounds = (self.min_motor_speed, self.max_motor_speed)
+        self.bounds = [self.motor_speed_bounds] * 6 + [self.tilt_bounds] * 6
+
+    def allocate(self, desired_wrench):
+
+        def objective(x):
+            motor_speeds = x[:6]
+            tilts = x[6:]
+            return 10.0 * np.sum(motor_speeds**2) + 1.0 * np.sum(tilts**2)  # Penalize speed and tilt
+
+        def constraint_eq(x):
+            motor_speeds = x[:6]
+            tilts = x[6:]
+
+            A = self._compute_allocation_matrix(tilts)
+            thrusts = self.k_thrust * motor_speeds**2
+
+            return A @ thrusts
+        
+        epsilon = 1e-12
+        nonlinear_constraint = NonlinearConstraint(
+            fun=constraint_eq,
+            lb=desired_wrench - epsilon,
+            ub=desired_wrench + epsilon,
+            jac='2-point',
+            hess='3-point'
+        )
+
+        result = differential_evolution(
+            lambda x: objective(x),
+            bounds=self.bounds,
+            constraints=nonlinear_constraint,
+            strategy='best1bin',
+            maxiter=50,
+            popsize=20,
+            tol=1e-6,
+            mutation=(0.5, 1),
+            recombination=0.7,
+            polish=True
+        )
+
+        motor_speeds = result.x[:6]
+        tilts = result.x[6:]
+        return motor_speeds, tilts
+
+    def _compute_allocation_matrix(self, tilt_angles):
+        A = np.zeros((6, 6))
+        for i in range(6):
+            psi = i * (np.pi / 3)
+            l = self.arm_length
+            gamma = self.k_drag_to_thrust
+            sigma = self.motor_directions[i]
+            alpha = tilt_angles[i]
+
+            u_i = np.array([
+                np.sin(psi) * np.sin(alpha),
+                -np.cos(psi) * np.sin(alpha),
+                np.cos(alpha)
+            ])
+
+            xi_i = np.array([l * np.cos(psi), l * np.sin(psi), 0])
+            cross = np.cross(xi_i, u_i)
+            T = gamma * sigma * u_i + cross
+            A[:, i] = np.concatenate([u_i, T])
+
+        return A
 
 # ─────────────────────────────────────────────
 # Control Allocator (Wrapper/Factory)
@@ -136,11 +218,10 @@ class ControlAllocator:
             self.allocator = FixedTiltAllocator(**kwargs)
         elif method == 'variable_tilt':
             self.allocator = VariableTiltAllocator(**kwargs)
+        elif method == 'optimized':
+            self.allocator = OptimizedAllocator(**kwargs)
         else:
             raise ValueError(f"Unsupported allocation method: {method}")
 
     def allocate(self, desired_wrench):
         return self.allocator.allocate(desired_wrench)
-
-    def thrust_to_motor_speeds(self, thrusts):
-        return self.allocator.thrust_to_motor_speeds(thrusts)
