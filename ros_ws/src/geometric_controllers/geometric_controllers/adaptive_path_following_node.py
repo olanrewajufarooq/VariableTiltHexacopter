@@ -180,7 +180,6 @@ class AdaptivePathFollowingNode(Node):
 
                 # Compute wrench
                 wrench = self.controller.compute_wrench(
-                    m=self.mass, g=self.gravity,
                     H_des=self.H_des, H=self.H,
                     V_des=self.V_des, V=self.V
                 ).flatten()

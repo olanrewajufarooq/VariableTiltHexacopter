@@ -59,22 +59,25 @@ def get_generalized_inertia(m, I, cog):
 # Base Abstract Controller
 # ─────────────────────────────────────────────
 class BaseController(ABC):
-    def __init__(self, Kp_att, Kp_pos, Kd, CoG = [0, 0, 0]):
+    def __init__(self, Kp_att, Kp_pos, Kd, m, CoG = [0, 0, 0], g=9.8):
         self.Kp_att = np.diag(Kp_att)
         self.Kp_pos = np.diag(Kp_pos)
         self.Kd = np.diag(Kd)
 
+        self.mass = m
+        self.gravity = g
+
         self.CoG = np.array(CoG).reshape(3, 1)
 
-    def get_gravity_wrench(self, m, g, H):
+    def get_gravity_wrench(self, H):
 
-        g_world = np.vstack((np.zeros((3,1)), np.array([0, 0, -m*g]).reshape(3,1)))
+        g_world = np.vstack((np.zeros((3,1)), np.array([0, 0, -self.mass*self.gravity]).reshape(3,1)))
 
         g = Ad(H).T @ g_world
 
         return g
 
-    def get_Wp(self, m, g, H_des, H):
+    def get_Wp(self, H_des, H):
         R = H[:3,:3]
         p = H[:3,3].reshape(3,1)
 
@@ -91,36 +94,36 @@ class BaseController(ABC):
         H_grav[:3, :3] = R
         H_grav[:3, 3] = self.CoG.flatten()
 
-        return -np.vstack((T, F)) - self.get_gravity_wrench(m, g, H_grav)
+        return -np.vstack((T, F)) - self.get_gravity_wrench(H_grav)
 
     def get_Wd(self, V_des, V, H):
         e_v = V - Ad(H) @ V_des
         return -self.Kd @ e_v
 
     @abstractmethod
-    def compute_wrench(self, m, g, H_des, H, V_des, V):
+    def compute_wrench(self, H_des, H, V_des, V):
         pass
 
 # ─────────────────────────────────────────────
 # PD Controller
 # ─────────────────────────────────────────────
 class PDController(BaseController):
-    def __init__(self, Kp_att, Kp_pos, Kd, CoG, m=None, I=None):
-        super().__init__(Kp_att, Kp_pos, Kd, CoG)
+    def __init__(self, Kp_att, Kp_pos, Kd, m, CoG, I=None):
+        super().__init__(Kp_att, Kp_pos, Kd, m, CoG)
     
-    def compute_wrench(self, m, g, H_des, H, V_des, V):
-        return self.get_Wp(m, g, H_des, H) + self.get_Wd(V_des, V, H)
+    def compute_wrench(self, H_des, H, V_des, V):
+        return self.get_Wp(H_des, H) + self.get_Wd(V_des, V, H)
 
 # ─────────────────────────────────────────────
 # Feedback Linearized Controller
 # ─────────────────────────────────────────────
 class FeedbackLinearizedController(BaseController):
     def __init__(self, Kp_att, Kp_pos, Kd, CoG, m, I):
-        super().__init__(Kp_att, Kp_pos, Kd, CoG)
+        super().__init__(Kp_att, Kp_pos, Kd, m, CoG)
         self.I = get_generalized_inertia(m=m, I=I, cog=self.CoG)
 
-    def compute_wrench(self, m, g, H_des, H, V_des, V):
-        Wp = self.get_Wp(m, g, H_des, H)
+    def compute_wrench(self, H_des, H, V_des, V):
+        Wp = self.get_Wp(H_des, H)
         Wd = self.get_Wd(V_des, V, H)
         return -ad(V).T @ self.I @ V + (Wp + Wd)
 
@@ -129,14 +132,14 @@ class FeedbackLinearizedController(BaseController):
 # ─────────────────────────────────────────────
 class AdaptiveController(BaseController):
     def __init__(self, Kp_att, Kp_pos, Kd, CoG, m, I):
-        super().__init__(Kp_att, Kp_pos, Kd, CoG)
+        super().__init__(Kp_att, Kp_pos, Kd, m, CoG)
         self.I = get_generalized_inertia(m=m, I=I, cog=self.CoG)
 
-    def adaptation_law(self, m, g, H_des, H, V_des, V):
+    def adaptation_law(self, H_des, H, V_des, V):
         raise NotImplementedError()
 
-    def compute_wrench(self, m, g, H_des, H, V_des, V):
-        Wp = self.get_Wp(m, g, H_des, H)
+    def compute_wrench(self, H_des, H, V_des, V):
+        Wp = self.get_Wp(H_des, H)
         Wd = self.get_Wd(V_des, V, H)
         return -ad(V).T @ self.I @ V + (Wp + Wd)
 
@@ -144,9 +147,9 @@ class AdaptiveController(BaseController):
 # Single Controller Interface (Factory)
 # ─────────────────────────────────────────────
 class Controller:
-    def __init__(self, method, Kp_att, Kp_pos, Kd, CoG=[0, 0, 0], m=1, I=None):
+    def __init__(self, method, Kp_att, Kp_pos, Kd, m, CoG=[0, 0, 0], I=None):
         if method == 'PD':
-            self.controller = PDController(Kp_att=Kp_att, Kp_pos=Kp_pos, Kd=Kd, CoG=CoG)
+            self.controller = PDController(Kp_att=Kp_att, Kp_pos=Kp_pos, Kd=Kd, m=m, CoG=CoG)
         elif method == 'FeedLin':
             self.controller = FeedbackLinearizedController(Kp_att=Kp_att, Kp_pos=Kp_pos, Kd=Kd, CoG=CoG, m=m, I=I)
         elif method == 'Adaptive':
@@ -154,5 +157,5 @@ class Controller:
         else:
             raise ValueError(f"Unknown controller method: {method}")
 
-    def compute_wrench(self, m, g, H_des, H, V_des, V):
-        return self.controller.compute_wrench(m, g, H_des, H, V_des, V)
+    def compute_wrench(self, H_des, H, V_des, V):
+        return self.controller.compute_wrench(H_des, H, V_des, V)

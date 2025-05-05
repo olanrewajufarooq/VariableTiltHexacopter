@@ -247,12 +247,13 @@ gz sdf -p ../path/variable_tilt_hexacopter.urdf > ../path/variable_tilt_hexacopt
 ⬜ GUI for Control  
 ✅ Control Allocation (Fixed Tilt)  
 ⬜ Control Allocation (Variable Tilt)  
+✅ Control Allocation (Optimization-based)  
 ✅ Open Loop: Hover Control  
 ✅ Geometric-based Control: PD Control   
 ⬜ Geometric-based Control: Feedback Linearized Control   
 ⬜ Geometric-based Control: Adaptive Control   
 ✅ Realistic world environments  
-⬜ Trajectory Planning  
+✅ Trajectory Planning  
 ✅ Integrate sensor plugins (IMU, camera)  
 ⬜ State Estimation and Mapping  
 ⬜ Extend to Floating-Base Manipulators  
