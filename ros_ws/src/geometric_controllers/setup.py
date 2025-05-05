@@ -24,6 +24,7 @@ setup(
         'console_scripts': [
             'hover_control_node = geometric_controllers.hover_control_node:main',
             'path_following_node = geometric_controllers.path_following_node:main',
+            'adaptive_path_following_node = geometric_controllers.adaptive_path_following_node:main',
         ],
     },
 )
