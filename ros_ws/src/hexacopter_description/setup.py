@@ -32,6 +32,7 @@ setup(
             'simple_control_node = hexacopter_description.simple_control_node:main',
             'control_allocation_node = hexacopter_description.control_allocation_node:main',
             'hover_control_node = hexacopter_description.hover_control_node:main',
+            'payload_manager = hexacopter_description.payload_manager:main',
         ],
     },
 )
