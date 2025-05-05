@@ -13,86 +13,6 @@
           <izz>0.00534206</izz>
         </inertia>
       </inertial>
-      <sensor name="imu_sensor" type="imu">
-        <always_on>true</always_on>
-        <update_rate>100.0</update_rate>
-        <pose>0 0 0 0 0 0</pose>
-        <topic>/model/variable_tilt_hexacopter/imu</topic>
-        <imu>
-          <angular_velocity>
-            <x>
-              <noise type="gaussian">
-                <mean>0</mean>
-                <stddev>0.009</stddev>
-                <bias_mean>0.00075</bias_mean>
-                <bias_stddev>0.005</bias_stddev>
-                <dynamic_bias_stddev>0.00002</dynamic_bias_stddev>
-                <dynamic_bias_correlation_time>400.0</dynamic_bias_correlation_time>
-                <precision>0.00025</precision>
-              </noise>
-            </x>
-            <y>
-              <noise type="gaussian">
-                <mean>0</mean>
-                <stddev>0.009</stddev>
-                <bias_mean>0.00075</bias_mean>
-                <bias_stddev>0.005</bias_stddev>
-                <dynamic_bias_stddev>0.00002</dynamic_bias_stddev>
-                <dynamic_bias_correlation_time>400.0</dynamic_bias_correlation_time>
-                <precision>0.00025</precision>
-              </noise>
-            </y>
-            <z>
-              <noise type="gaussian">
-                <mean>0</mean>
-                <stddev>0.009</stddev>
-                <bias_mean>0.00075</bias_mean>
-                <bias_stddev>0.005</bias_stddev>
-                <dynamic_bias_stddev>0.00002</dynamic_bias_stddev>
-                <dynamic_bias_correlation_time>400.0</dynamic_bias_correlation_time>
-                <precision>0.00025</precision>
-              </noise>
-            </z>
-          </angular_velocity>
-          <linear_acceleration>
-            <x>
-              <noise type="gaussian">
-                <mean>0</mean>
-                <stddev>0.021</stddev>
-                <bias_mean>0.05</bias_mean>
-                <bias_stddev>0.0075</bias_stddev>
-                <dynamic_bias_stddev>0.000375</dynamic_bias_stddev>
-                <dynamic_bias_correlation_time>175.0</dynamic_bias_correlation_time>
-                <precision>0.005</precision>
-              </noise>
-            </x>
-            <y>
-              <noise type="gaussian">
-                <mean>0</mean>
-                <stddev>0.021</stddev>
-                <bias_mean>0.05</bias_mean>
-                <bias_stddev>0.0075</bias_stddev>
-                <dynamic_bias_stddev>0.000375</dynamic_bias_stddev>
-                <dynamic_bias_correlation_time>175.0</dynamic_bias_correlation_time>
-                <precision>0.005</precision>
-              </noise>
-            </y>
-            <z>
-              <noise type="gaussian">
-                <mean>0</mean>
-                <stddev>0.021</stddev>
-                <bias_mean>0.05</bias_mean>
-                <bias_stddev>0.0075</bias_stddev>
-                <dynamic_bias_stddev>0.000375</dynamic_bias_stddev>
-                <dynamic_bias_correlation_time>175.0</dynamic_bias_correlation_time>
-                <precision>0.005</precision>
-              </noise>
-            </z>
-          </linear_acceleration>
-          <enable_orientation>true</enable_orientation>
-        </imu>
-        <plugin filename="ignition-gazebo-imu-system" name="ignition::gazebo::systems::Imu"/>
-      </sensor>
       <collision name='base_dummy_fixed_joint_lump__base_collision'>
         <pose>0 0 0 0 0 0</pose>
         <geometry>
@@ -180,47 +100,6 @@
         </geometry>
       </visual>
     </link>
-    <link name="camera">
-      <inertial>
-        <pose>0.0 0.0 0.0 0 0 0</pose>
-        <mass>0.050</mass>
-        <inertia>
-          <ixx>0.00004</ixx>
-          <ixy>0</ixy>
-          <ixz>0</ixz>
-          <iyy>0.00004</iyy>
-          <iyz>0</iyz>
-          <izz>0.00004</izz>
-        </inertia>
-      </inertial>
-      <sensor name="rgb_camera" type="camera">
-        <!-- <pose>0 0 0 0 0 0</pose> -->
-        <camera>
-          <horizontal_fov>1.74</horizontal_fov>
-          <image>
-            <width>1280</width>
-            <height>960</height>
-            <format>R8G8B8</format>
-          </image>
-          <clip>
-            <near>0.1</near>
-            <far>3000</far>
-          </clip>
-        </camera>
-        <always_on>1</always_on>
-        <update_rate>30</update_rate>
-        <visualize>true</visualize>
-        <topic>/model/variable_tilt_hexacopter/camera</topic>
-        <plugin filename="ignition-gazebo-sensors-system" name="ignition::gazebo::systems::Sensors"/>
-      </sensor>
-      <gravity>true</gravity>
-      <velocity_decay/>
-    </link>
-    <joint name='camera_link_joint' type='fixed'>
-      <pose>0 0 -0.025 0 0 0</pose>
-      <parent>base_dummy</parent>
-      <child>camera</child>
-    </joint>
     <joint name='joint_arm_1' type='revolute'>
       <pose relative_to='base_dummy'>0.1855 0 0 0 0 0</pose>
       <parent>base_dummy</parent>
@@ -917,6 +796,104 @@
         </geometry>
       </visual>
     </link>
+    <joint name='joint_slider_left' type='prismatic'>
+      <pose relative_to='base_dummy'>0.053249999999999992 0 -0.050000000000000003 0 0 0</pose>
+      <parent>base_dummy</parent>
+      <child>slider_left</child>
+      <axis>
+        <xyz>-1 0 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>0.053249999999999992</upper>
+          <effort>5</effort>
+          <velocity>0.10000000000000001</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='slider_left'>
+      <pose relative_to='joint_slider_left'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0.053249999999999992 0 -0.050000000000000003 0 0 0</pose>
+        <mass>0.050000000000000003</mass>
+        <inertia>
+          <ixx>1.0000000000000001e-05</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.0000000000000001e-05</iyy>
+          <iyz>0</iyz>
+          <izz>1.0000000000000001e-05</izz>
+        </inertia>
+      </inertial>
+      <collision name='slider_left_collision'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.01 0.050000000000000003 0.050000000000000003</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='slider_left_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.01 0.050000000000000003 0.050000000000000003</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='joint_slider_right' type='prismatic'>
+      <pose relative_to='base_dummy'>-0.053249999999999992 0 -0.050000000000000003 0 0 0</pose>
+      <parent>base_dummy</parent>
+      <child>slider_right</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>0.053249999999999992</upper>
+          <effort>5</effort>
+          <velocity>0.10000000000000001</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='slider_right'>
+      <pose relative_to='joint_slider_right'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>-0.053249999999999992 0 -0.050000000000000003 0 0 0</pose>
+        <mass>0.050000000000000003</mass>
+        <inertia>
+          <ixx>1.0000000000000001e-05</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.0000000000000001e-05</iyy>
+          <iyz>0</iyz>
+          <izz>1.0000000000000001e-05</izz>
+        </inertia>
+      </inertial>
+      <collision name='slider_right_collision'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.01 0.050000000000000003 0.050000000000000003</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='slider_right_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.01 0.050000000000000003 0.050000000000000003</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
     <frame name='camera_joint' attached_to='base'>
       <pose>0 0 0.025000000000000001 0 0 0</pose>
     </frame>
@@ -1145,50 +1122,21 @@
       <joint_name>joint_arm_6</joint_name>
       <topic>/model/variable_tilt_hexacopter/joint_arm_6/cmd_pos</topic>
     </plugin>
+    <plugin filename="libignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>joint_slider_left</joint_name>
+      <topic>/model/variable_tilt_hexacopter/joint_slider_left/cmd_pos</topic>
+    </plugin>
+    <plugin filename="libignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>joint_slider_right</joint_name>
+      <topic>/model/variable_tilt_hexacopter/joint_slider_right/cmd_pos</topic>
+    </plugin>
     <plugin filename="libignition-gazebo-detachable-joint-system.so" name="ignition::gazebo::systems::DetachableJoint">
-      <parent_link>base_dummy</parent_link>
-      <child_model>attached_mass</child_model>
-      <child_link>attached_mass_link</child_link>
-      <topic>/model/variable_tilt_hexacopter/attached_mass/detach</topic>
+       <parent_link>base_dummy</parent_link>
+       <child_model>attached_mass</child_model>
+       <child_link>attached_mass_link</child_link>
+       <detach_topic>/model/variable_tilt_hexacopter/payload/detach</detach_topic>
+       <attach_topic>/model/variable_tilt_hexacopter/payload/attach</attach_topic>
+       <output_topic>/model/variable_tilt_hexacopter/payload/state</output_topic>
     </plugin>
   </model>
-
-  <model name='attached_mass'>
-    <!-- 1) position the whole model so its top face just touches base_dummy’s bottom -->
-    <!--    base_dummy cylinder half-height = 0.025, cube half-size = 0.005 → offset = –0.025 – 0.005 = –0.03 -->
-    <pose>0 0 -0.03 0 0 0</pose>
-    <link name='attached_mass_link'>
-      <inertial>
-        <!-- 2) link frame at cube’s center ⇒ COM at (0,0,0) -->
-        <pose>0 0 0 0 0 0</pose>
-        <mass>0.5</mass>
-        <inertia>
-          <!-- cube side a = 0.01 m, m = 0.5 kg ⇒ I = (1/6) m a² = 8.3333e-6 -->
-          <ixx>8.333333333333333e-06</ixx>
-          <iyy>8.333333333333333e-06</iyy>
-          <izz>8.333333333333333e-06</izz>
-          <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
-        </inertia>
-      </inertial>
-      <collision name="attached_mass_collision">
-        <!-- 3) collision box centered on link frame -->
-        <pose>0 0 0 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>0.01 0.01 0.01</size>
-          </box>
-        </geometry>
-      </collision>
-      <visual name="attached_mass_visual">
-        <!-- 4) visual also centered -->
-        <pose>0 0 0 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>0.01 0.01 0.01</size>
-          </box>
-        </geometry>
-      </visual>
-    </link>
-  </model>
-
 </sdf>

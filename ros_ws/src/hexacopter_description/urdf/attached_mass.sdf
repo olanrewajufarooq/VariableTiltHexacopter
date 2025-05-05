@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<sdf version="1.9">
+  <model name="attached_mass">
+    <pose>0 0 0.0 0 0 0</pose>
+    <link name="attached_mass_link">
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.50</mass>
+        <inertia>
+          <ixx>8.333333333333333e-06</ixx>
+          <iyy>8.333333333333333e-06</iyy>
+          <izz>8.333333333333333e-06</izz>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyz>0</iyz>
+        </inertia>
+      </inertial>
+      <collision name="attached_mass_collision">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.075 0.075 0.08</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="attached_mass_visual">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.075 0.075 0.08</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0 1 0 1</ambient>
+          <diffuse>0 1 0 1</diffuse>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
