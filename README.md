@@ -166,6 +166,13 @@ src-hexacopter
    ros2 launch geometric_controllers path_following.launch.py path:=square
    ```
 
+### 5. Adaptive Geometric Control Demo
+- Same as the geometric control commands except that the launch name file is changed.  
+   You can change the mass of the attached object in `attached_mass.sdf` file under the `hexacopter_description/urdf` folder.
+   ```
+   ros2 launch geometric_controllers path_following_adaptive.launch.py path:=square
+   ```
+
 ### Running entire pipeline (Using Single Script) 
 
 __Warning__: Not advised. It does not stop the Gazebo Simulation correctly.  
@@ -212,7 +219,6 @@ The pipeline involves: running simulation, recording ROS bags and plotting the r
       -d 80 \
       -s 2
    ```
-
 
 ## Important Development Notes
 
