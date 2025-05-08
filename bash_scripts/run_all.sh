@@ -62,10 +62,9 @@ echo "⏳ Letting simulation run for $DURATION seconds..."
 sleep $DURATION
 
 # ──────────────── STEP 5: Kill all background processes ────────────────
-echo "🛑 Stopping simulation and recording..."
-kill $LAUNCH_PID
-sleep 1
+echo "🛑 Stopping recording..."
 kill $BAG_PID
+
 
 # ──────────────── STEP 6: Plot Results ────────────────
 echo "📊 Plotting results into $PLOT_PATH..."
@@ -73,3 +72,8 @@ mkdir -p $PLOT_PATH
 python3 $BAG_DIR/plot_hexacopter.py -b $BAG_PATH -o $PLOT_PATH -d $DURATION -s $START_SHIFT
 
 echo "✅ All done!"
+
+# ─────────
+# Stop Simulation
+echo "🛑 Stopping simulation..."
+sleep 30 

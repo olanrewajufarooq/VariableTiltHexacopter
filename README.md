@@ -201,6 +201,8 @@ The pipeline involves: running simulation, recording ROS bags and plotting the r
       /model/variable_tilt_hexacopter/desired_wrench \
       /model/variable_tilt_hexacopter/plot/motor_speed \
       /model/variable_tilt_hexacopter/plot/tilt_angle \
+      /model/variable_tilt_hexacopter/desired_pose \
+      /model/variable_tilt_hexacopter/desired_velocity \
       -o geometric_control_PD_square_bag
    ```
 
