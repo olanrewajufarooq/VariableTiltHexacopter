@@ -5,7 +5,7 @@
     <link name="attached_mass_link">
       <inertial>
         <pose>0 0 0 0 0 0</pose>
-        <!-- <mass>0.50</mass>
+        <mass>0.50</mass>
         <inertia>
           <ixx>5.0104e-04</ixx>
           <iyy>5.0104e-04</iyy>
@@ -13,7 +13,7 @@
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyz>0</iyz>
-        </inertia> -->
+        </inertia>
         <!-- <mass>0.40</mass>
         <inertia>
           <ixx>4.0083e-04</ixx>
@@ -23,7 +23,7 @@
           <ixz>0</ixz>
           <iyz>0</iyz>
         </inertia> -->
-        <mass>0.60</mass>
+        <!-- <mass>0.60</mass>
         <inertia>
           <ixx>6.0125e-04</ixx>
           <iyy>6.0125e-04</iyy>
@@ -31,7 +31,7 @@
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyz>0</iyz>
-        </inertia>
+        </inertia> -->
       </inertial>
       <collision name="attached_mass_collision">
         <pose>0 0 0 0 0 0</pose>

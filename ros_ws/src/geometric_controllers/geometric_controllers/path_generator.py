@@ -15,9 +15,9 @@ class BasePath(ABC):
     @abstractmethod
     def generate(self, t: float) -> tuple[np.ndarray, np.ndarray]:
         """
-        Compute pose H (4×4) and spatial velocity V (6×1) at time t.
+        Compute pose H (4×4), spatial velocity V (6×1) and acceleration A (6×1) at time t.
         :param t: elapsed time since start in seconds
-        :return: (H, V)
+        :return: (H, V, A)
         """
         pass
 
@@ -27,7 +27,8 @@ class HoverPath(BasePath):
         H = np.eye(4)
         H[2, 3] = self.altitude
         V = np.zeros((6, 1))
-        return H, V
+        A = np.zeros((6, 1))
+        return H, V, A
 
 class CirclePath(BasePath):
     """Circle in XY plane, constant altitude."""
@@ -42,19 +43,27 @@ class CirclePath(BasePath):
             x, y = 0.0, 0.0
             z = self.altitude * alpha
             vx, vy, vz = 0.0, 0.0, 0.0
-            yaw = 0.0
-            omega = 0.0
+            ax, ay, az = 0.0, 0.0, 0.0
+            yaw, omega, omega_dot = 0.0, 0.0, 0.0
         else:
             t -= self.hover_transition_time
+
             r = self.scale
             theta = (self.omega * t) % (2 * np.pi)
-            y, x = r * (np.cos(theta) - 1), r * math.sin(theta)
-            # vy = -r * self.omega * np.sin(theta)
-            # vx = r * self.omega * np.cos(theta)
-            vx = vy = 0.0
-            z, vz = self.altitude, 0.0
+            
+            x, y = r * (np.cos(theta) - 1), r * math.sin(theta)
+            
+            vx = -r * self.omega * np.sin(theta)
+            vy = r * self.omega * np.cos(theta)
+
+            ax = -r * self.omega**2 * np.cos(theta)
+            ay = -r * self.omega**2 * np.sin(theta)
+            
+            z, vz, az = self.altitude, 0.0, 0.0
+
             yaw = theta
             omega = self.omega
+            omega_dot = 0.0
 
         Rz = R.from_euler('z', yaw).as_matrix()
         H  = np.eye(4)
@@ -62,7 +71,8 @@ class CirclePath(BasePath):
         H[:3,3]  = [x, y, z]
 
         V = np.array([0, 0, omega, vx, vy, vz]).reshape(6,1)
-        return H, V
+        A = np.array([0, 0, omega_dot, ax, ay, az]).reshape(6,1)
+        return H, V, A
 
 class SquarePath(BasePath):
     """Square loop in XY plane, constant altitude."""
@@ -78,7 +88,8 @@ class SquarePath(BasePath):
             x, y = 0.0, 0.0
             z = self.altitude * alpha
             vx, vy, vz = 0.0, 0.0, 0.0
-            yaw = 0.0
+            ax, ay, az = 0.0, 0.0, 0.0
+            yaw, omega, omega_dot = 0.0, 0.0, 0.0
 
         else:
             t -= self.hover_transition_time
@@ -109,7 +120,7 @@ class SquarePath(BasePath):
             z = self.altitude
             vz = 0.0
             
-            yaw = 0.0   
+            yaw, omega, omega_dot = 0.0, 0.0, 0.0
 
         Rz  = R.from_euler('z', yaw).as_matrix()
 
@@ -117,8 +128,9 @@ class SquarePath(BasePath):
         H[:3,:3] = Rz; 
         H[:3,3] = [x, y, z]
 
-        V   = np.array([0, 0, 0, vx, vy, vz]).reshape(6,1)
-        return H, V
+        V   = np.array([0, 0, omega, vx, vy, vz]).reshape(6,1)
+        A   = np.array([0, 0, omega_dot, 0, 0, 0]).reshape(6,1)
+        return H, V, A
 
 class InfinityPath(BasePath):
     """Figure‐8 (lemniscate) in XY plane, constant altitude."""
@@ -135,25 +147,34 @@ class InfinityPath(BasePath):
             x, y = 0.0, 0.0
             z = self.altitude * alpha
             vx, vy, vz = 0.0, 0.0, 0.0
-            yaw = 0.0
+            ax, ay, az = 0.0, 0.0, 0.0
+            yaw, omega, omega_dot = 0.0, 0.0, 0.0
+
         else:
             t -= self.hover_transition_time
-            θ = self.omega * t
+            theta = self.omega * t
             a = self.a
-            x = a * math.sin(θ)
-            y = a * math.sin(2 * θ) / 2
-            vx = a * self.omega * math.cos(θ)
-            vy = a * self.omega * math.cos(2 * θ)
-            z, vz = self.altitude, 0.0
-            yaw = 0.0  # Maintain fixed orientation
+
+            x = a * math.sin(theta)
+            y = a * math.sin(2 * theta) / 2
+
+            vx = a * self.omega * math.cos(theta)
+            vy = a * self.omega * math.cos(2 * theta)
+
+            ax = -a * self.omega**2 * np.sin(theta)
+            ay = -2 * a * self.omega**2 * np.sin(2 * theta)
+
+            z, vz, az = self.altitude, 0.0, 0.0
+            yaw, omega, omega_dot = 0.0, 0.0, 0.0
 
         Rz = R.from_euler('z', yaw).as_matrix()
         H  = np.eye(4); 
         H[:3,:3] = Rz; 
         H[:3,3] = [x, y, z]
 
-        V  = np.array([0, 0, 0, vx, vy, vz]).reshape(6,1)
-        return H, V
+        V  = np.array([0, 0, omega, vx, vy, vz]).reshape(6,1)
+        A  = np.array([0, 0, omega_dot, ax, ay, az]).reshape(6,1)
+        return H, V, A
 
 class TakeoffLandPath(BasePath):
     """Simple start_with_hover, straight move, and landing profile."""
@@ -184,7 +205,8 @@ class TakeoffLandPath(BasePath):
         H = np.eye(4)
         H[:3,3] = [x, y, z]
         V = np.array([0,0,0,vx,vy,vz]).reshape(6,1)
-        return H, V
+        A = np.array([0,0,0,0,0,0]).reshape(6,1)
+        return H, V, A
 
 class PathGenerator:
     """Selects among multiple BasePath strategies."""

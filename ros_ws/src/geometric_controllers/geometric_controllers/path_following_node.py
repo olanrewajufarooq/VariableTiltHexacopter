@@ -25,6 +25,7 @@ class PathFollowingNode(Node):
         self.declare_parameter('Kd', [1.0]*6)
 
         self.declare_parameter('controller_type', 'PD')  # PD, FeedLin, Adaptive
+        self.declare_parameter('potential_type', 'liealgebra')  # liealgebra, separate
         self.declare_parameter('I', [0.1]*6)  # Inertia matrix if needed
         self.declare_parameter('CoG', [0.0, 0.0, 0.0])  # Center of Gravity
 
@@ -43,6 +44,7 @@ class PathFollowingNode(Node):
         self.Kd = self.get_parameter('Kd').value
 
         self.controller_type = self.get_parameter('controller_type').value
+        self.potential_type = self.get_parameter('potential_type').value
         self.I = self.get_parameter('I').value
         self.CoG = self.get_parameter('CoG').value
 
@@ -60,7 +62,9 @@ class PathFollowingNode(Node):
         self.odometry_received = False
 
         # ───── Initialize Controller and Path Generator ─────
-        self.get_logger().info(f"Using controller: {self.controller_type}")
+        self.get_logger().info(f"Controller: {self.controller_type} | Potential type: {self.potential_type}")
+
+        self.previous_time = None
 
         self.controller = Controller(
             method=self.controller_type,
@@ -69,7 +73,8 @@ class PathFollowingNode(Node):
             Kd=self.Kd,
             m=self.mass,
             I=self.I,
-            CoG=self.CoG
+            CoG=self.CoG,
+            pot_type=self.potential_type,
         )
 
         self.path_generator = PathGenerator(
@@ -141,16 +146,32 @@ class PathFollowingNode(Node):
             now = self.get_clock().now()
             current_time = now.nanoseconds * 1e-9
 
+            if self.previous_time is None:
+                self.previous_time = current_time
+
             # Update desired path
-            self.H_des, self.V_des = self.path_generator.generate(current_time)
+            self.H_des, self.V_des, self.A_des = self.path_generator.generate(current_time)
             self.publish_desired_pose(now)
             self.publish_desired_velocity(now)
 
             # Compute wrench
-            wrench = self.controller.compute_wrench(
-                H_des=self.H_des, H=self.H,
-                V_des=self.V_des, V=self.V
-            ).flatten()
+            if self.controller_type == 'Adaptive':
+                wrench = self.controller.compute_wrench(
+                    H_des=self.H_des, H=self.H,
+                    V_des=self.V_des, V=self.V,
+                    A_des=self.A_des, dt = current_time - self.previous_time,
+                ).flatten()
+
+                est_mass = self.controller.estimated_unknown_mass
+                self.get_logger().info(f"Estimated Mass: {est_mass}")
+
+                self.previous_time = current_time
+            else:
+                wrench = self.controller.compute_wrench(
+                    H_des=self.H_des, H=self.H,
+                    V_des=self.V_des, V=self.V,
+                    A_des=self.A_des,
+                ).flatten()
 
             wrench_msg = Wrench()
             wrench_msg.force.x, wrench_msg.force.y, wrench_msg.force.z = wrench[3:]

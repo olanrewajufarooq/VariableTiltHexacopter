@@ -55,7 +55,15 @@ def generate_launch_description():
     declare_controller_type = DeclareLaunchArgument(
         'controller_type',
         default_value='PD',
-        description='Controller type: PD, FeedLin or Adaptive'
+        description='Controller type: PD, FeedLin, FeedForward or Adaptive',
+        choices=['PD', 'FeedLin', 'FeedForward', 'Adaptive'],
+    )
+
+    declare_potential_type = DeclareLaunchArgument(
+        'potential_type',
+        default_value='liealgebra',
+        description='Controller type: liealgebra or separate',
+        choices=['liealgebra', 'separate'],
     )
 
     declare_Kp_att = DeclareLaunchArgument(
@@ -125,6 +133,7 @@ def generate_launch_description():
             'Kp_att': PythonExpression(LaunchConfiguration('Kp_att')),
             'Kp_pos': PythonExpression(LaunchConfiguration('Kp_pos')),
             'Kd': PythonExpression(LaunchConfiguration('Kd')),
+            'potential_type': LaunchConfiguration('potential_type'),
         }],
     )
 
@@ -141,6 +150,7 @@ def generate_launch_description():
         declare_Kp_pos,
         declare_Kd,
         declare_path_start_with_hover,
+        declare_potential_type,
 
         spawn_launch,
         control_allocation_node,

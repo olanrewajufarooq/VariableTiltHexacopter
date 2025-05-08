@@ -11,3 +11,10 @@ path_following_node:
     mass: 3.646  # kg
     I: [0.04092, 0.04019, 0.06921, 0.00005656, -0.00006494, 0.00001313]  # kg*m² ((Ixx, Iyy, Izz, Ixy, Ixz, Iyz))
     CoG: [0.0, 0.0, -0.0023]  # Center of Gravity in meters (x, y, z)
+
+adaptive_path_following_node:
+  ros__parameters:
+    gravity: 9.8 # m/s²
+    mass: 3.646  # kg
+    I: [0.04092, 0.04019, 0.06921, 0.00005656, -0.00006494, 0.00001313]  # kg*m² ((Ixx, Iyy, Izz, Ixy, Ixz, Iyz))
+    CoG: [0.0, 0.0, -0.0023]  # Center of Gravity in meters (x, y, z)
