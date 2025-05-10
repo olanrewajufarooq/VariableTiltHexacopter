@@ -80,6 +80,7 @@ def generate_launch_description():
 
             # Image data
             '/model/variable_tilt_hexacopter/camera@sensor_msgs/msg/Image[gz.msgs.Image',
+            '/model/variable_tilt_hexacopter/camera/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
             '/model/variable_tilt_hexacopter/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
 
             # Motor Speed Command
