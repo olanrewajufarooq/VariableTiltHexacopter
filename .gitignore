@@ -53,3 +53,9 @@ CMakeLists.txt.user
 # ================================================================
 # End of ROS2 .gitignore
 # ================================================================
+
+# Ignoring ROS2 Numpy
+ros_ws/src/ros2_numpy
+
+# Ignoring Open3D ROS2 Helper
+ros_ws/src/open3d-ros2-helper
