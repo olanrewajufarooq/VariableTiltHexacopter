@@ -183,7 +183,7 @@ class AdaptivePathFollowingNode(Node):
 
             try:
                 # Update desired path
-                self.H_des, self.V_des = self.path_generator.generate(ctrl_time)
+                self.H_des, self.V_des, self.A_des = self.path_generator.generate(ctrl_time)
                 self.publish_desired_pose(now)
                 self.publish_desired_velocity(now)
 
@@ -192,7 +192,7 @@ class AdaptivePathFollowingNode(Node):
                     wrench = self.controller.compute_wrench(
                         H_des=self.H_des, H=self.H,
                         V_des=self.V_des, V=self.V,
-                        dt = ctrl_time - self.previous_time,
+                        A_des=self.A_des, dt = ctrl_time - self.previous_time,
                     ).flatten()
 
                     est_mass = self.controller.estimated_unknown_mass
@@ -202,7 +202,8 @@ class AdaptivePathFollowingNode(Node):
                 else:
                     wrench = self.controller.compute_wrench(
                         H_des=self.H_des, H=self.H,
-                        V_des=self.V_des, V=self.V
+                        V_des=self.V_des, V=self.V,
+                        A_des=self.A_des,
                     ).flatten()
 
                 wrench_msg = Wrench()

@@ -20,6 +20,7 @@ class BaseController(ABC):
 
         self.CoG = np.array(CoG).reshape(3, 1)
         self.H_err = None
+        self.V_err = None
 
     def get_gravity_wrench(self, H):
 
@@ -56,8 +57,8 @@ class BaseController(ABC):
         return -Wp - self.get_gravity_wrench(H_grav)
 
     def get_Wd(self, V_des, V):
-        e_v = V - Ad_inv(self.H_err) @ V_des
-        return -self.Kd @ e_v
+        self.V_err = V - Ad_inv(self.H_err) @ V_des
+        return -self.Kd @ self.V_err
 
     @abstractmethod
     def compute_wrench(self, H_des, H, V_des, V, dt=None):
@@ -131,7 +132,7 @@ class AdaptiveController(BaseController):
         H[:3, 3] = np.zeros((3,))
 
         g = np.vstack((np.zeros((3,1)), np.array([0, 0, -self.gravity]).reshape(3,1)))
-        self.estimated_unknown_mass += np.float(self.gamma * V.T @ Ad(H).T @ g * dt)
+        self.estimated_unknown_mass += float(self.gamma * V.T @ Ad(H).T @ g * dt)
 
         self.mass = self.nominal_mass + self.estimated_unknown_mass
         self.mass = max(self.mass, self.nominal_mass)  # Prevent negative mass

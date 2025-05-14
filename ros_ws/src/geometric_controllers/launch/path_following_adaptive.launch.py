@@ -28,8 +28,8 @@ def generate_launch_description():
     )
 
     declare_path_type = DeclareLaunchArgument(
-        'path', default_value='takeoff_land',
-        description='Path type: circle, square, infinity, takeoff_land, hover.'
+        'path', default_value='infinity_loop',
+        description='Path type: circle, square, infinity_loop, takeoff_land, hover.'
     )
 
     declare_path_scale = DeclareLaunchArgument(
@@ -54,8 +54,15 @@ def generate_launch_description():
 
     declare_controller_type = DeclareLaunchArgument(
         'controller_type',
-        default_value='PD',
+        default_value='Adaptive',
         description='Controller type: PD, FeedLin or Adaptive'
+    )
+
+    declare_potential_type = DeclareLaunchArgument(
+        'potential_type',
+        default_value='liealgebra',
+        description='Controller type: liealgebra or separate',
+        choices=['liealgebra', 'separate'],
     )
 
     declare_Kp_att = DeclareLaunchArgument(
@@ -122,6 +129,7 @@ def generate_launch_description():
             'path_altitude': LaunchConfiguration('path_altitude'),
             'path_start_with_hover': LaunchConfiguration('path_start_with_hover'),
             'controller_type': LaunchConfiguration('controller_type'),
+            'potential_type': LaunchConfiguration('potential_type'),
             'Kp_att': PythonExpression(LaunchConfiguration('Kp_att')),
             'Kp_pos': PythonExpression(LaunchConfiguration('Kp_pos')),
             'Kd': PythonExpression(LaunchConfiguration('Kd')),
@@ -137,6 +145,7 @@ def generate_launch_description():
         declare_path_period,
         declare_path_altitude,
         declare_controller_type,
+        declare_potential_type,
         declare_Kp_att,
         declare_Kp_pos,
         declare_Kd,
