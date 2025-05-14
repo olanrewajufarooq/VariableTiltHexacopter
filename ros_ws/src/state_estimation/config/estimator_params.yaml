@@ -1,0 +1,26 @@
+state_estimatior_node:
+  ros__parameters:
+    mode: robust
+
+    camera:
+      width: 1280.0
+      height: 960.0
+      fx: 539.94       # fx = width / (2 * tan(fov/2)) = 1280 / (2 * tan(1.74/2 * 180/pi)) = 539.94
+      fy: 404.95       # fy = fx * height / width = 539.94 * 960 / 1280 = 404.95
+      cx: 640.0        # width / 2
+      cy: 480.0        # height / 2
+      depth_scale: 1000.0
+      depth_trunc: 4.0
+
+    estimator:
+      gravity: 9.81
+      imu:
+        accel_noise: 0.021      # Stddev of linear acceleration noise
+        gyro_noise: 0.009       # Stddev of angular velocity noise
+        integration_cov: 0.0001 # Default small integration noise
+        bias_noise: 0.0075      # Stddev of bias (from bias_stddev of accelerometer)
+
+      prior_noise:
+        pose: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]   # Conservative priors (m, rad)
+        velocity: 0.1                          # Initial velocity prior (m/s)
+        bias: 0.0075                           # Bias prior (from stddev)
