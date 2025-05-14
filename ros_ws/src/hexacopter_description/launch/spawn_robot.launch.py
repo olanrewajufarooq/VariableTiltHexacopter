@@ -79,9 +79,10 @@ def generate_launch_description():
             '/model/variable_tilt_hexacopter/imu@sensor_msgs/msg/Imu[gz.msgs.IMU',
 
             # Image data
-            '/model/variable_tilt_hexacopter/camera@sensor_msgs/msg/Image[gz.msgs.Image',
+            '/model/variable_tilt_hexacopter/camera/image@sensor_msgs/msg/Image[gz.msgs.Image',
+            '/model/variable_tilt_hexacopter/camera/depth_image@sensor_msgs/msg/Image[gz.msgs.Image',
             '/model/variable_tilt_hexacopter/camera/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
-            '/model/variable_tilt_hexacopter/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
+            '/model/variable_tilt_hexacopter/camera/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
 
             # Motor Speed Command
             "/model/variable_tilt_hexacopter/command/motor_speed@actuator_msgs/msg/Actuators]gz.msgs.Actuators",
