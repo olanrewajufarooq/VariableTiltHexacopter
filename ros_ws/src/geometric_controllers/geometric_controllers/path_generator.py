@@ -111,11 +111,11 @@ class SquarePath(BasePath):
             elif side == 2: 
                 x = s - s*(dt/self.side_time)
                 y = s
-                vx = s / self.side_time
+                vx = -s / self.side_time
             else:
                 x = 0
                 y = s - s*(dt/self.side_time)
-                vy = s / self.side_time
+                vy = -s / self.side_time
             
             z = self.altitude
             vz = 0.0

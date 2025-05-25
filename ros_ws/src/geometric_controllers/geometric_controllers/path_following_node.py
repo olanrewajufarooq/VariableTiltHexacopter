@@ -162,8 +162,8 @@ class PathFollowingNode(Node):
                     A_des=self.A_des, dt = current_time - self.previous_time,
                 ).flatten()
 
-                est_mass = self.controller.estimated_unknown_mass
-                self.get_logger().info(f"Estimated Mass: {est_mass}")
+                # est_mass = self.controller.estimated_unknown_mass
+                # self.get_logger().info(f"Estimated Mass: {est_mass}")
 
                 self.previous_time = current_time
             else:

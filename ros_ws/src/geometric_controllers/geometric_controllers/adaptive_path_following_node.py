@@ -195,8 +195,8 @@ class AdaptivePathFollowingNode(Node):
                         A_des=self.A_des, dt = ctrl_time - self.previous_time,
                     ).flatten()
 
-                    est_mass = self.controller.estimated_unknown_mass
-                    self.get_logger().info(f"Estimated Mass: {est_mass}")
+                    m, I6, cog = self.controller._unpack_theta()
+                    self.get_logger().info(f"Estimated Mass: {m}. Estimated CoG: {cog[0]}, {cog[1]}, {cog[2]}.")
 
                     self.previous_time = ctrl_time
                 else:
