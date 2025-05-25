@@ -195,7 +195,7 @@ The pipeline involves: running simulation, recording ROS bags and plotting the r
 
 - Launch ROS Bag
    ```
-   cd ~/VariableTiltHexacopter/ros_bags
+   cd ~/VariableTiltHexacopter/ros_bags/bags
    ros2 bag record \
       /model/variable_tilt_hexacopter/odometry \
       /model/variable_tilt_hexacopter/desired_wrench \
@@ -216,7 +216,7 @@ The pipeline involves: running simulation, recording ROS bags and plotting the r
    ```
    cd ~/VariableTiltHexacopter/ros_bags
    python3 plot_hexacopter.py \
-      -b geometric_control_PD_square_bag \
+      -b bags/geometric_control_PD_square_bag \
       -o plot/PD_square \
       -d 80 \
       -s 2

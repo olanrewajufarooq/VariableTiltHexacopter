@@ -61,7 +61,8 @@ class CirclePath(BasePath):
             
             z, vz, az = self.altitude, 0.0, 0.0
 
-            yaw = theta
+            # yaw = theta
+            yaw = np.arctan2(vy, vx)
             omega = self.omega
             omega_dot = 0.0
 
@@ -121,6 +122,7 @@ class SquarePath(BasePath):
             vz = 0.0
             
             yaw, omega, omega_dot = 0.0, 0.0, 0.0
+            ax, ay, az = 0.0, 0.0, 0.0
 
         Rz  = R.from_euler('z', yaw).as_matrix()
 
@@ -129,7 +131,7 @@ class SquarePath(BasePath):
         H[:3,3] = [x, y, z]
 
         V   = np.array([0, 0, omega, vx, vy, vz]).reshape(6,1)
-        A   = np.array([0, 0, omega_dot, 0, 0, 0]).reshape(6,1)
+        A   = np.array([0, 0, omega_dot, ax, ay, az]).reshape(6,1)
         return H, V, A
 
 class InfinityPath(BasePath):

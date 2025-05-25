@@ -11,6 +11,7 @@ from nav_msgs.msg import Odometry
 
 from geometric_controllers.controller import Controller
 from geometric_controllers.path_generator import PathGenerator
+from geometric_controllers.utils import Ad_inv
 
 class PathFollowingNode(Node):
     def __init__(self):
