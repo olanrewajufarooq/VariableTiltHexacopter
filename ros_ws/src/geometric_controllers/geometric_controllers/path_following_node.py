@@ -208,7 +208,10 @@ class PathFollowingNode(Node):
         twist_msg.header.stamp = now.to_msg()
         twist_msg.header.frame_id = 'world'
 
-        V_flat = self.V_des.flatten()
+        H_err = np.linalg.inv(self.H_des) @ self.H
+        V_des_bodyframe = Ad_inv(H_err) @ self.V_des
+        V_flat = V_des_bodyframe.flatten()
+        
         twist_msg.twist.angular.x = float(V_flat[0])
         twist_msg.twist.angular.y = float(V_flat[1])
         twist_msg.twist.angular.z = float(V_flat[2])
