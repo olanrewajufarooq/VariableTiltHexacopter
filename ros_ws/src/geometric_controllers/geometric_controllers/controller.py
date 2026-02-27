@@ -1,14 +1,24 @@
 import numpy as np
 from abc import ABC, abstractmethod
-from geometric_controllers.utils import vee, hat, ad, Ad, Ad_inv, get_generalized_inertia
+from geometric_controllers.utils import (
+    vee,
+    hat,
+    ad,
+    Ad,
+    Ad_inv,
+    get_generalized_inertia,
+)
 from scipy.linalg import expm, logm
+
 
 # ─────────────────────────────────────────────
 # Base Abstract Controller
 # ─────────────────────────────────────────────
 class BaseController(ABC):
-    def __init__(self, Kp_att, Kp_pos, Kd, m, CoG = [0, 0, 0], g=9.8, pot_type='liealgebra'):
-        self.pot_type = pot_type # 'liealgebra' or 'separate'
+    def __init__(
+        self, Kp_att, Kp_pos, Kd, m, CoG=[0, 0, 0], g=9.8, pot_type="liealgebra"
+    ):
+        self.pot_type = pot_type  # 'liealgebra' or 'separate'
 
         self.Kp_att = np.diag(Kp_att)
         self.Kp_pos = np.diag(Kp_pos)
@@ -24,7 +34,12 @@ class BaseController(ABC):
 
     def get_gravity_wrench(self, H):
 
-        g_world = np.vstack((np.zeros((3,1)), np.array([0, 0, -self.mass*self.gravity]).reshape(3,1)))
+        g_world = np.vstack(
+            (
+                np.zeros((3, 1)),
+                np.array([0, 0, -self.mass * self.gravity]).reshape(3, 1),
+            )
+        )
         g = Ad(H).T @ g_world
 
         return g
@@ -32,31 +47,40 @@ class BaseController(ABC):
     def get_Wp(self, H_des, H):
         self.H_err = np.linalg.inv(H_des) @ H
 
-        if self.pot_type == 'liealgebra':
+        if self.pot_type == "liealgebra":
             e_p = vee(logm(self.H_err))
+            if np.iscomplexobj(e_p):
+                e_p = e_p.real
             Wp = self.Kp @ e_p
-            
-        elif self.pot_type == 'separate':
-            R = H[:3,:3]
-            p = H[:3,3].reshape(3,1)
 
-            R_des = H_des[:3,:3]
-            p_des = H_des[:3,3].reshape(3,1)
+        elif self.pot_type == "separate":
+            R = H[:3, :3]
+            p = H[:3, 3].reshape(3, 1)
+
+            R_des = H_des[:3, :3]
+            p_des = H_des[:3, 3].reshape(3, 1)
 
             e_p = p - p_des
             R_err = R_des.T @ R
 
             F = self.Kp_pos @ e_p
-            T = vee(0.5 * ( self.Kp_att @ R_err - (self.Kp_att @ R_err).T ))
+            e_R = vee(0.5 * (R_err - R_err.T))
+            T = self.Kp_att @ e_R
 
             Wp = np.vstack((T, F)).reshape(6, 1)
-        
+
         H_grav = H.copy()
         H_grav[:3, 3] = self.CoG.flatten()
 
         return -Wp - self.get_gravity_wrench(H_grav)
 
-    def get_Wd(self, V_des, V):
+    def get_Wd(self, V_des, V, H_des=None, H=None):
+        if self.H_err is None:
+            if H_des is None or H is None:
+                raise ValueError(
+                    "H_des and H must be provided to compute velocity error."
+                )
+            self.H_err = np.linalg.inv(H_des) @ H
         self.V_err = V - Ad_inv(self.H_err) @ V_des
         return -self.Kd @ self.V_err
 
@@ -64,74 +88,82 @@ class BaseController(ABC):
     def compute_wrench(self, H_des, H, V_des, V, dt=None):
         pass
 
+
 # ─────────────────────────────────────────────
 # PD Controller
 # ─────────────────────────────────────────────
 class PDController(BaseController):
-    def __init__(self, Kp_att, Kp_pos, Kd, m, CoG, I=None, pot_type='liealgebra'):
+    def __init__(self, Kp_att, Kp_pos, Kd, m, CoG, I=None, pot_type="liealgebra"):
         super().__init__(Kp_att, Kp_pos, Kd, m, CoG, pot_type=pot_type)
-    
+
     def compute_wrench(self, H_des, H, V_des, V):
-        return self.get_Wp(H_des, H) + self.get_Wd(V_des, V)
+        return self.get_Wp(H_des, H) + self.get_Wd(V_des, V, H_des=H_des, H=H)
+
 
 # ─────────────────────────────────────────────
 # Feedback Linearized Controller
 # ─────────────────────────────────────────────
 class FeedbackLinearizedController(BaseController):
-    def __init__(self, Kp_att, Kp_pos, Kd, CoG, m, I, pot_type='liealgebra'):
+    def __init__(self, Kp_att, Kp_pos, Kd, CoG, m, I, pot_type="liealgebra"):
         super().__init__(Kp_att, Kp_pos, Kd, m, CoG, pot_type=pot_type)
         self.I = get_generalized_inertia(m=m, I=I, cog=self.CoG)
 
     def compute_wrench(self, H_des, H, V_des, V):
         Wp = self.get_Wp(H_des, H)
-        Wd = self.get_Wd(V_des, V)
+        Wd = self.get_Wd(V_des, V, H_des=H_des, H=H)
         return ad(V).T @ self.I @ V + (Wp + Wd)
+
 
 # ────────────────────────────────────────────
 # Feedforward Compensation Controller
 # ─────────────────────────────────────────────
 
+
 class FeedforwardCompensationController(BaseController):
-    def __init__(self, Kp_att, Kp_pos, Kd, CoG, m, I, pot_type='liealgebra'):
+    def __init__(self, Kp_att, Kp_pos, Kd, CoG, m, I, pot_type="liealgebra"):
         super().__init__(Kp_att, Kp_pos, Kd, m, CoG, pot_type=pot_type)
         self.I = get_generalized_inertia(m=m, I=I, cog=self.CoG)
 
-    def compute_wrench(self, H_des, H, V_des, V, A_des = np.zeros((6, 1)) ):
+    def compute_wrench(self, H_des, H, V_des, V, A_des=np.zeros((6, 1))):
         # Error terms
         self.H_err = np.linalg.inv(H_des) @ H
         Ad_inv_ = Ad_inv(self.H_err)
         V_e = V - Ad_inv_ @ V_des
+        Ad_err = Ad(self.H_err)
 
         # Feedforward term (transformed desired acceleration)
-        feedforward_term = self.I @ Ad_inv_ @ (A_des - ad(V_des) @ V_e)
+        feedforward_term = self.I @ Ad_inv_ @ (A_des + ad(V_des) @ (Ad_err @ V_e))
 
         # Coriolis compensation
         coriolis_term = ad(V).T @ self.I @ V
 
         # Proportional and Derivative terms
         Wp = self.get_Wp(H_des, H)
-        Wd = self.get_Wd(V_des, V)
+        Wd = self.get_Wd(V_des, V, H_des=H_des, H=H)
 
         # Total control wrench
         return coriolis_term + feedforward_term + Wp + Wd
-    
+
 
 # ─────────────────────────────────────────────
 # (Prev) Adaptive Controller
 # ─────────────────────────────────────────────
 class PrevAdaptiveController(BaseController):
-    def __init__(self, Kp_att, Kp_pos, Kd, CoG, m, I, gamma=0.01, pot_type='liealgebra'):
+    def __init__(
+        self, Kp_att, Kp_pos, Kd, CoG, m, I, gamma=0.01, pot_type="liealgebra"
+    ):
         super().__init__(Kp_att, Kp_pos, Kd, m, CoG, pot_type=pot_type)
         self.I = get_generalized_inertia(m=m, I=I, cog=self.CoG)
-        
+
         self.nominal_mass = m
         self.estimated_unknown_mass = 0.0
         self.gamma = gamma
 
     def adaptation_law(self, H, V, dt):
+        H = H.copy()
         H[:3, 3] = np.zeros((3,))
 
-        g = np.vstack((np.zeros((3,1)), np.array([0, 0, -self.gravity]).reshape(3,1)))
+        g = np.vstack((np.zeros((3, 1)), np.array([0, 0, -self.gravity]).reshape(3, 1)))
         self.estimated_unknown_mass += float(self.gamma * V.T @ Ad(H).T @ g * dt)
 
         self.mass = self.nominal_mass + self.estimated_unknown_mass
@@ -140,10 +172,11 @@ class PrevAdaptiveController(BaseController):
     def compute_wrench(self, H_des, H, V_des, V, dt):
         self.adaptation_law(H, V, dt)
         Wp = self.get_Wp(H_des, H)
-        Wd = self.get_Wd(V_des, V)
+        Wd = self.get_Wd(V_des, V, H_des=H_des, H=H)
         W = Wp + Wd
         return W
-    
+
+
 # ─────────────────────────────────────────────
 # Adaptive Controller
 # ─────────────────────────────────────────────
@@ -155,22 +188,23 @@ class AdaptiveController(BaseController):
     The basis matrices 𝓘_i and 𝓖_i reproduce (54)–(55) of the paper,
     and the update law ẋ̂ = Γ Yᵀ V_e dt enforces ḊV ≤0.
     """
+
     # ------------------------------------------------------------------
-    def __init__(self, Kp_att, Kp_pos, Kd, CoG, m, I,
-                 gamma=None, pot_type='liealgebra'):
+    def __init__(
+        self, Kp_att, Kp_pos, Kd, CoG, m, I, gamma=None, pot_type="liealgebra"
+    ):
         super().__init__(Kp_att, Kp_pos, Kd, m, CoG, pot_type=pot_type)
 
         # initial parameter estimates -------------------------------------------------
         Ixx, Iyy, Izz, Ixy, Ixz, Iyz = I
         print(f"Initial inertia: {Ixx}, {Iyy}, {Izz}, {Ixy}, {Ixz}, {Iyz}")
         self.theta_hat = np.array(
-            [Ixx, Iyy, Izz, Ixy, Iyz, Ixz,
-             m,
-             m * CoG[0], m * CoG[1], m * CoG[2]],
-            dtype=float).reshape(10, 1)
+            [Ixx, Iyy, Izz, Ixy, Iyz, Ixz, m, m * CoG[0], m * CoG[1], m * CoG[2]],
+            dtype=float,
+        ).reshape(10, 1)
 
         if gamma is None:
-            self.gamma = 1e-3 * np.diag([1, 1, 1, 1, 1, 1, 3, 0.1, 0.1, 0.5])
+            self.gamma = 4e-3 * np.diag([20, 20, 30, 1, 1, 1, 90, 30, 30, 60])
         elif isinstance(gamma, (int, float)):
             self.gamma = gamma * np.eye(10)
         elif isinstance(gamma, (list, np.ndarray)) and len(gamma) == 10:
@@ -186,28 +220,34 @@ class AdaptiveController(BaseController):
     # ------------------------------------------------------------------
     def _construct_bases(self):
         """Pre-compute 6×6 generators 𝓘_i (i=1…10) and 𝓖_i (i=7…10)."""
+
         def hat(v):
-            return np.array([[0., -v[2],  v[1]],
-                             [v[2],  0., -v[0]],
-                             [-v[1], v[0], 0.]])
+            return np.array(
+                [[0.0, -v[2], v[1]], [v[2], 0.0, -v[0]], [-v[1], v[0], 0.0]]
+            )
 
         # --- inertia generators ------------------------------------------------------
         self.I_basis = []
 
         # i = 1 … 3  → diagonal moments
         for k in range(3):
-            E = np.zeros((3, 3));  E[k, k] = 1.
-            Gi = np.zeros((6, 6)); Gi[:3, :3] = E
+            E = np.zeros((3, 3))
+            E[k, k] = 1.0
+            Gi = np.zeros((6, 6))
+            Gi[:3, :3] = E
             self.I_basis.append(Gi)
 
         # i = 4 … 6  → off-diagonal products (xy, yz, xz)  — symmetric
-        for (i, j) in [(0, 1), (1, 2), (0, 2)]:
-            E = np.zeros((3, 3));  E[i, j] = E[j, i] = 1.
-            Gi = np.zeros((6, 6)); Gi[:3, :3] = E
+        for i, j in [(0, 1), (1, 2), (0, 2)]:
+            E = np.zeros((3, 3))
+            E[i, j] = E[j, i] = 1.0
+            Gi = np.zeros((6, 6))
+            Gi[:3, :3] = E
             self.I_basis.append(Gi)
 
         # i = 7  → pure mass in translational block
-        Gi = np.zeros((6, 6)); Gi[3:, 3:] = np.eye(3)
+        Gi = np.zeros((6, 6))
+        Gi[3:, 3:] = np.eye(3)
         self.I_basis.append(Gi)
 
         # i = 8 … 10  → m ξ cross-terms:  tilde(e_i) in upper-right *and* lower-left
@@ -222,13 +262,15 @@ class AdaptiveController(BaseController):
         # --- gravity generators 𝓖_i (only 7…10) ------------------------------------
         self.G_basis = []
         # i = 7
-        G7 = np.zeros((6, 6)); G7[3:, 3:] = np.eye(3)
+        G7 = np.zeros((6, 6))
+        G7[3:, 3:] = np.eye(3)
         self.G_basis.append(G7)
         # i = 8…10
         for ax in range(3):
             e = np.eye(3)[ax]
             S = hat(e)
-            Gi = np.zeros((6, 6)); Gi[:3, :3] = S
+            Gi = np.zeros((6, 6))
+            Gi[:3, :3] = S
             self.G_basis.append(Gi)
 
     # ------------------------------------------------------------------
@@ -252,8 +294,9 @@ class AdaptiveController(BaseController):
         m, _, cog = self._unpack_theta()
         Hg = H.copy()
         Hg[:3, 3] = cog
-        g_world = np.vstack((np.zeros((3, 1)),
-                             np.array([0, 0, -m * self.gravity]).reshape(3, 1)))
+        g_world = np.vstack(
+            (np.zeros((3, 1)), np.array([0, 0, -m * self.gravity]).reshape(3, 1))
+        )
         return Ad(Hg).T @ g_world
 
     # ------------------------------------------------------------------
@@ -263,18 +306,17 @@ class AdaptiveController(BaseController):
         """Return 6×10 matrix Y."""
         Ad_inv_err = Ad_inv(H_err)
         V_e = V - Ad_inv_err @ V_d
-        a_bar = a_d - ad(V_d) @ V_e
+        a_bar = a_d + ad(V_d) @ (Ad(H_err) @ V_e)
 
         # common gravity vector  [R g; R g]
         R = H[:3, :3]
         g_body = R @ np.array([0, 0, -self.gravity]).reshape(3, 1)
-        gvec = np.vstack((g_body, g_body))        # (6×1)
+        gvec = np.vstack((g_body, g_body))  # (6×1)
 
         cols = []
         for i in range(10):
-            term = -ad(V).T @ self.I_basis[i] @ V \
-                   - self.I_basis[i] @ Ad_inv_err @ a_bar
-            if i >= 6:       # i = 7…10 ⇒ add gravity contribution
+            term = -ad(V).T @ self.I_basis[i] @ V - self.I_basis[i] @ Ad_inv_err @ a_bar
+            if i >= 6:  # i = 7…10 ⇒ add gravity contribution
                 Gi = self.G_basis[i - 6]
                 term += Gi @ gvec
             cols.append(term)
@@ -293,8 +335,7 @@ class AdaptiveController(BaseController):
     # ------------------------------------------------------------------
     #   Public API
     # ------------------------------------------------------------------
-    def compute_wrench(self, H_des, H, V_des, V,
-                       A_des=None, dt=1e-3):
+    def compute_wrench(self, H_des, H, V_des, V, A_des=None, dt=1e-3):
         if A_des is None:
             A_des = np.zeros((6, 1))
 
@@ -316,44 +357,85 @@ class AdaptiveController(BaseController):
         self.CoG = cog.reshape(3, 1)  # update CoG in BaseController
         self.mass = m  # update mass in BaseController
 
-        Wp = self.get_Wp(H_des, H)          # potential + gravity compensation
-        Wd = self.get_Wd(V_des, V)          # damping
-        coriolis   = ad(V).T @ I_hat @ V
-        feed_forwd = I_hat @ Ad_inv_err @ (A_des - ad(V_des) @ V_e)
+        Wp = self.get_Wp(H_des, H)  # potential + gravity compensation
+        Wd = self.get_Wd(V_des, V, H_des=H_des, H=H)  # damping
+        coriolis = ad(V).T @ I_hat @ V
+        feed_forwd = I_hat @ Ad_inv_err @ (A_des + ad(V_des) @ (Ad(H_err) @ V_e))
 
         return coriolis + feed_forwd + Wp + Wd
         # return coriolis + feed_forwd + Wp + Wd - Wg_hat
+
 
 # ─────────────────────────────────────────────
 # Single Controller Interface (Factory)
 # ─────────────────────────────────────────────
 class Controller:
-    def __init__(self, method, Kp_att, Kp_pos, Kd, m, CoG=[0, 0, 0], I=None, pot_type='liealgebra'):
+    def __init__(
+        self,
+        method,
+        Kp_att,
+        Kp_pos,
+        Kd,
+        m,
+        CoG=[0, 0, 0],
+        I=None,
+        pot_type="liealgebra",
+    ):
         self.method = method
 
-        if method == 'PD':
-            self.controller = PDController(Kp_att=Kp_att, Kp_pos=Kp_pos, Kd=Kd, m=m, CoG=CoG, pot_type=pot_type)
-        elif method == 'FeedLin':
-            self.controller = FeedbackLinearizedController(Kp_att=Kp_att, Kp_pos=Kp_pos, Kd=Kd, CoG=CoG, m=m, I=I, pot_type=pot_type)
-        elif method == 'FeedForward':
-            self.controller = FeedforwardCompensationController(Kp_att=Kp_att, Kp_pos=Kp_pos, Kd=Kd, CoG=CoG, m=m, I=I, pot_type=pot_type)
-        elif method == 'Adaptive':
-            self.controller = AdaptiveController(Kp_att=Kp_att, Kp_pos=Kp_pos, Kd=Kd, CoG=CoG, m=m, I=I, pot_type=pot_type)
+        if method == "PD":
+            self.controller = PDController(
+                Kp_att=Kp_att, Kp_pos=Kp_pos, Kd=Kd, m=m, CoG=CoG, pot_type=pot_type
+            )
+        elif method == "FeedLin":
+            self.controller = FeedbackLinearizedController(
+                Kp_att=Kp_att,
+                Kp_pos=Kp_pos,
+                Kd=Kd,
+                CoG=CoG,
+                m=m,
+                I=I,
+                pot_type=pot_type,
+            )
+        elif method == "FeedForward":
+            self.controller = FeedforwardCompensationController(
+                Kp_att=Kp_att,
+                Kp_pos=Kp_pos,
+                Kd=Kd,
+                CoG=CoG,
+                m=m,
+                I=I,
+                pot_type=pot_type,
+            )
+        elif method == "Adaptive":
+            self.controller = AdaptiveController(
+                Kp_att=Kp_att,
+                Kp_pos=Kp_pos,
+                Kd=Kd,
+                CoG=CoG,
+                m=m,
+                I=I,
+                pot_type=pot_type,
+            )
         else:
             raise ValueError(f"Unknown controller method: {method}")
 
-    def compute_wrench(self, H_des, H, V_des, V, A_des = None, dt=None):
-        if self.method == 'PD':
+    def compute_wrench(self, H_des, H, V_des, V, A_des=None, dt=None):
+        if self.method == "PD":
             return self.controller.compute_wrench(H_des=H_des, H=H, V_des=V_des, V=V)
-        elif self.method == 'FeedLin':
+        elif self.method == "FeedLin":
             return self.controller.compute_wrench(H_des=H_des, H=H, V_des=V_des, V=V)
-        if self.method == 'FeedForward':
+        if self.method == "FeedForward":
             if A_des is None:
                 A_des = np.zeros((6, 1))
-            return self.controller.compute_wrench(H_des=H_des, H=H, V_des=V_des, V=V, A_des=A_des)
-        elif self.method == 'Adaptive':
-            return self.controller.compute_wrench(H_des=H_des, H=H, V_des=V_des, V=V, dt=dt)
-    
+            return self.controller.compute_wrench(
+                H_des=H_des, H=H, V_des=V_des, V=V, A_des=A_des
+            )
+        elif self.method == "Adaptive":
+            return self.controller.compute_wrench(
+                H_des=H_des, H=H, V_des=V_des, V=V, dt=dt
+            )
+
     def __getattr__(self, name):
         """Forward undefined attributes to the wrapped controller"""
         return getattr(self.controller, name)
