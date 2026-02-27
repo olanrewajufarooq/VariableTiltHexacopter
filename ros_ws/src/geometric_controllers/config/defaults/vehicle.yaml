@@ -1,0 +1,10 @@
+# Default physical parameters used by controllers.
+# These values can be overridden by presets or launch args.
+
+vehicle:
+  gravity: 9.8
+  mass: 3.646
+  # Inertia about the body frame origin: [Ixx, Iyy, Izz, Ixy, Ixz, Iyz]
+  I: [0.04092, 0.04019, 0.06921, 0.00005656, -0.00006494, 0.00001313]
+  # Center of gravity in meters (x, y, z)
+  CoG: [0.0, 0.0, -0.0023]

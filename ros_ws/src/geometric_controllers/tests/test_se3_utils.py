@@ -40,7 +40,7 @@ def test_ad_matrix_structure():
     assert np.allclose(ad_V[3:6, 3:6], hat(V[:3]))
 
 
-def test_generalized_inertia_parallel_axis():
+def test_generalized_inertia_blocks():
     m = 2.0
     I = [1.0, 2.0, 3.0, 0.1, 0.2, 0.3]
     cog = np.array([0.4, -0.3, 0.2])

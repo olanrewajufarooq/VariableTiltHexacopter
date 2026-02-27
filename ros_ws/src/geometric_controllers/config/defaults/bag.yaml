@@ -1,0 +1,12 @@
+# Default bag settings.
+
+bag:
+  record: true
+  topics:
+    - /model/variable_tilt_hexacopter/odometry
+    - /model/variable_tilt_hexacopter/desired_pose
+    - /model/variable_tilt_hexacopter/desired_velocity
+    - /model/variable_tilt_hexacopter/desired_acceleration
+    - /model/variable_tilt_hexacopter/desired_wrench
+    - /model/variable_tilt_hexacopter/plot/motor_speed
+    - /model/variable_tilt_hexacopter/plot/tilt_angle

@@ -1,0 +1,5 @@
+# Default control allocation settings.
+
+allocation:
+  method: fixed_tilt
+  tilt_angle: 0.57

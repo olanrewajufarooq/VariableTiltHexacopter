@@ -1,0 +1,7 @@
+# Default payload event settings.
+
+payload:
+  events_enabled: false
+  pick_wait_s: 2.0
+  # <0 => use pick_wait_s + period/2
+  drop_time_s: -1.0

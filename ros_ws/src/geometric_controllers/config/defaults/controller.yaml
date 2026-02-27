@@ -1,0 +1,10 @@
+# Default controller configuration (ROS-agnostic intent).
+
+controller:
+  controller_type: PD  # PD|FeedLin|FeedForward
+  potential_type: liealgebra
+  adaptation_type: None  # None|Euclidean|GeoAware
+  gains:
+    Kp_att: [5.5, 5.5, 5.5]
+    Kp_pos: [5.5, 5.5, 5.5]
+    Kd: [2.05, 2.05, 2.05, 2.05, 2.05, 2.05]

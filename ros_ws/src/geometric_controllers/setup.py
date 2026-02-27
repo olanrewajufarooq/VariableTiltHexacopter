@@ -13,6 +13,8 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
         (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
+        (os.path.join('share', package_name, 'config', 'defaults'), glob('config/defaults/*.yaml')),
+        (os.path.join('share', package_name, 'config', 'presets'), glob('config/presets/*.yaml')),
     ],
     install_requires=['setuptools', 'rclpy', 'actuator_msgs', 'numpy', 'scipy'],
     zip_safe=True,
@@ -22,9 +24,8 @@ setup(
     license='MIT',
     entry_points={
         'console_scripts': [
-            'hover_control_node = geometric_controllers.hover_control_node:main',
-            'path_following_node = geometric_controllers.path_following_node:main',
-            'adaptive_path_following_node = geometric_controllers.adaptive_path_following_node:main',
+            'control_node = geometric_controllers.control_node:main',
+            'trajectory_node = geometric_controllers.trajectory_node:main',
         ],
     },
 )

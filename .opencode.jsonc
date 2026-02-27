@@ -1,0 +1,48 @@
+{
+  // Repo convention: keep core logic ROS-agnostic (no rclpy); ROS code is thin glue.
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": [
+    "@tarquinen/opencode-dcp@latest"
+  ],
+  "mcp": {
+    "bash": {
+      "type": "local",
+      "command": ["bash"],
+      "enabled": true
+    },
+    "file": {
+      "type": "local",
+      "command": ["file"],
+      "enabled": true
+    },
+    "git": {
+      "type": "local",
+      "command": ["git"],
+      "enabled": true
+    },
+    "vscode": {
+      "type": "local",
+      "command": ["vscode"],
+      "enabled": true
+    }
+  },
+  "tools": {
+    "write": true,
+    "bash": true,
+    "read": true,
+    "edit": true,
+    "glob": true,
+    "grep": true,
+    "codesearch": true,
+    "websearch": true
+  },
+  "instructions": [
+    "AGENTS.md",
+    "ros_ws/src/**/*.py",
+    "ros_ws/src/**/*.cpp",
+    "ros_ws/src/**/*.yaml",
+    "ros_ws/src/**/*.launch.py",
+    "bash_scripts/*.sh"
+  ],
+  "disabled_providers": []
+}

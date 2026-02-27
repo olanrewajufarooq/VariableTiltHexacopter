@@ -1,6 +1,6 @@
 import numpy as np
 
-from geometric_controllers.path_generator import PreComputedPath
+from geometric_controllers.trajectories import PreComputedPath
 
 
 def assert_rotation_matrix(R):

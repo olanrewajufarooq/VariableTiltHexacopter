@@ -137,47 +137,44 @@ src-hexacopter
    ```
 
 ### 4. Geometric Control Demo
-- Launch the robot with simple hover control.  
-   - hover_altitude -   
-   - Kp_att - potential gain for orientation control (e.g.: "[1.0, 1.0, 1.0]")   
-   - Kp_pos - potential gain for position control (e.g.: "[1.0, 1.0, 1.0]")   
-   - Kd - derivative gain; angular first, then linear (e.g.: "[1.0, 1.0, 1.0, 5.0, 5.0, 5.0]")   
-   - allocation_method - control allocation method (fixed_tilt or variable_tilt).  
-   - tilt_angle - tilt angle of the rotors for fixed tilt in radians (one value for all).  
-   - world - the environment of the simulation. (empty.sdf or industrial_warehouse.sdf)  
-   **Use any of the following commands:** you may add more parameters to override the default.
-   ```bash
-   ros2 launch geometric_controllers hover_control.launch.py hover_altitude:=5.0
-   ```
+This repo now uses a preset-driven ROS launch entrypoint.
 
-- Launch the robot with trajectory tracking. 
-   - path - path type: circle, square, infinity, takeoff_land, hover
-   - path_scale - path scaling factor
-   - path_period - time to complete one cycle of the path
-   - path_altitude - altitude of the generated path
-   - Kp_att - potential gain for orientation control (e.g.: "[1.0, 1.0, 1.0]")   
-   - Kp_pos - potential gain for position control (e.g.: "[1.0, 1.0, 1.0]")   
-   - Kd - derivative gain; angular first, then linear (e.g.: "[1.0, 1.0, 1.0, 5.0, 5.0, 5.0]")   
-   - allocation_method - control allocation method (fixed_tilt or variable_tilt).  
-   - tilt_angle - tilt angle of the rotors for fixed tilt in radians (one value for all).  
-   - world - the environment of the simulation. (empty.sdf or industrial_warehouse.sdf)  
-   **Use the following commands:** you may add more parameters to override the default.
-   ```bash
-   ros2 launch geometric_controllers path_following.launch.py path:=square
-   ```
+Run one of the 4 presets (mirrors the MATLAB demos/paper configs):
+```bash
+ros2 launch geometric_controllers run_preset.launch.py preset:=nominal_demo
+ros2 launch geometric_controllers run_preset.launch.py preset:=adaptive_demo
+ros2 launch geometric_controllers run_preset.launch.py preset:=nominal_paper
+ros2 launch geometric_controllers run_preset.launch.py preset:=adaptive_paper
+```
+
+Presets live in:
+- `ros_ws/src/geometric_controllers/config/presets/`
+
+Defaults (merged with presets at launch time) live in:
+- `ros_ws/src/geometric_controllers/config/defaults/`
+
+Architecture note (clean split like MATLAB):
+- `trajectory_node` publishes desired state:
+  - `/model/variable_tilt_hexacopter/desired_pose`
+  - `/model/variable_tilt_hexacopter/desired_velocity`
+  - `/model/variable_tilt_hexacopter/desired_acceleration`
+- `control_node` subscribes to desired state + odometry and publishes:
+  - `/model/variable_tilt_hexacopter/desired_wrench`
+
+Controller configuration is split into independent knobs:
+- `controller_type`: `PD|FeedLin|FeedForward`
+- `adaptation_type`: `None|Euclidean|GeoAware`
+- `potential_type`: `liealgebra|separate`
 
 ### 5. Adaptive Geometric Control Demo
-- Same as the geometric control commands except that the launch name file is changed.  
-   You can change the mass of the attached object in `attached_mass.sdf` file under the `hexacopter_description/urdf` folder.
-   ```
-   ros2 launch geometric_controllers path_following_adaptive.launch.py path:=square
-   ```
+Use `preset:=adaptive_demo` or `preset:=adaptive_paper`.
 
 ### Running entire pipeline (Using Single Script) 
 
-__Warning__: Not advised. It does not stop the Gazebo Simulation correctly.  
+__Note__: The script is a convenience helper; the ROS-native way is `run_preset.launch.py`.
 
-The pipeline involves: running simulation, recording ROS bags and plotting the results. The entire pipeline is implemented in the `bash_scripts` folder. To run the pipeline, simple change the `controller_type` and the `path` to the desired values in the `bash_scripts/run_all.sh` file. Then, run the code:
+The pipeline involves: running simulation, recording ROS bags and plotting the results.
+The entire pipeline is implemented in `bash_scripts/run_all.sh` and runs one of the presets.
 
 ```
 cd ~/VariableTiltHexacopter/bash_scripts   
@@ -187,10 +184,10 @@ bash run_all.sh
 ### Running entire pipeline (In Separate Terminals)  
 
 The pipeline involves: running simulation, recording ROS bags and plotting the results. 
-- Launch Simulation
-   ```
+- Launch Simulation (preset)
+   ```bash
    src-hexacopter
-   ros2 launch geometric_controllers path_following.launch.py path:=hover path_period:=60.0
+   ros2 launch geometric_controllers run_preset.launch.py preset:=nominal_demo
    ```
 
 - Launch ROS Bag
@@ -278,4 +275,3 @@ Feel free to fork this repo and contribute via pull requests. Open issues for bu
 ## License
 
 [MIT License](LICENSE) – Free to use, modify, and distribute.
-

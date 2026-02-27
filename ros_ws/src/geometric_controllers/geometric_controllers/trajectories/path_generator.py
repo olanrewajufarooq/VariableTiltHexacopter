@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+from __future__ import annotations
+
 import math
 import numpy as np
 from abc import ABC, abstractmethod
@@ -90,8 +93,8 @@ class BasePath(ABC):
         self.start_with_hover = start_with_hover
 
     @abstractmethod
-    def generate(self, t: float):
-        pass
+    def generate(self, t: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        raise NotImplementedError
 
 
 class PreComputedPath(BasePath):
@@ -210,7 +213,7 @@ class PreComputedPath(BasePath):
         A = np.vstack((omega_dot.reshape(3, 1), a_body))
         return H, V, A
 
-    def generate(self, t: float):
+    def generate(self, t: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         p_pre, v_pre, a_pre, s, sdot, sddot = self._segment_time(t)
         if p_pre is not None:
             rpy = np.zeros(3)
@@ -448,6 +451,9 @@ class PathGenerator:
 
     def set_path(self, name: str):
         name = name.lower()
+        # Accept common launch-file spelling.
+        if name == "takeoff_land":
+            name = "takeoffland"
         self.path = PreComputedPath(
             name=name,
             scale=self.scale,
@@ -458,7 +464,9 @@ class PathGenerator:
         )
         self._start = None
 
-    def generate(self, current_time_sec: float):
+    def generate(
+        self, current_time_sec: float
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         if self._start is None:
             self._start = current_time_sec
         t = current_time_sec - self._start

@@ -1,0 +1,6 @@
+# Default simulation spawn settings.
+
+spawn:
+  launch: spawn_robot.launch.py
+  world: empty.sdf
+  start_pos: "0.0 0.0 0.3"

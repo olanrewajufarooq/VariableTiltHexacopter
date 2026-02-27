@@ -1,0 +1,47 @@
+preset:
+  name: adaptive_demo
+
+spawn:
+  launch: spawn_robot_adaptive.launch.py
+  world: empty.sdf
+  start_pos: "0.0 0.0 0.1"
+
+allocation:
+  method: fixed_tilt
+  tilt_angle: 0.57
+
+controller:
+  controller_type: FeedForward
+  potential_type: liealgebra
+  adaptation_type: Euclidean
+  gains:
+    Kp_att: [5.5, 5.5, 5.5]
+    Kp_pos: [5.5, 5.5, 5.5]
+    Kd: [2.05, 2.05, 2.05, 2.05, 2.05, 2.05]
+
+trajectory:
+  path: infinity3dmod
+  scale: 5.0
+  period: 24.0
+  altitude: 5.0
+  start_with_hover: true
+
+node:
+  rate_hz: 100.0
+
+payload:
+  events_enabled: true
+  pick_wait_s: 2.0
+  # <0 => use pick_wait_s + period/2
+  drop_time_s: -1.0
+
+bag:
+  record: true
+  topics:
+    - /model/variable_tilt_hexacopter/odometry
+    - /model/variable_tilt_hexacopter/desired_pose
+    - /model/variable_tilt_hexacopter/desired_velocity
+    - /model/variable_tilt_hexacopter/desired_acceleration
+    - /model/variable_tilt_hexacopter/desired_wrench
+    - /model/variable_tilt_hexacopter/plot/motor_speed
+    - /model/variable_tilt_hexacopter/plot/tilt_angle

@@ -1,6 +1,10 @@
 ## Ignore Visual Studio temporary files, build results, and
 .vscode/
 
+# Experiment outputs
+runs/
+ros_bags/bags/
+
 ## MATLAB Git Ignore
 
 *.slxc

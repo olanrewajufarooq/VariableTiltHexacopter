@@ -1,0 +1,44 @@
+preset:
+  name: nominal_demo
+
+spawn:
+  launch: spawn_robot.launch.py
+  world: empty.sdf
+  start_pos: "0.0 0.0 0.3"
+
+allocation:
+  method: fixed_tilt
+  tilt_angle: 0.57
+
+controller:
+  controller_type: FeedForward
+  potential_type: liealgebra
+  adaptation_type: None
+  gains:
+    Kp_att: [5.5, 5.5, 5.5]
+    Kp_pos: [5.5, 5.5, 5.5]
+    Kd: [2.05, 2.05, 2.05, 2.05, 2.05, 2.05]
+
+trajectory:
+  path: infinity3d
+  scale: 5.0
+  period: 25.0
+  altitude: 5.0
+  start_with_hover: true
+
+node:
+  rate_hz: 100.0
+
+payload:
+  events_enabled: false
+
+bag:
+  record: true
+  topics:
+    - /model/variable_tilt_hexacopter/odometry
+    - /model/variable_tilt_hexacopter/desired_pose
+    - /model/variable_tilt_hexacopter/desired_velocity
+    - /model/variable_tilt_hexacopter/desired_acceleration
+    - /model/variable_tilt_hexacopter/desired_wrench
+    - /model/variable_tilt_hexacopter/plot/motor_speed
+    - /model/variable_tilt_hexacopter/plot/tilt_angle

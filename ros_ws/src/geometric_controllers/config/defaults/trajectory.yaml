@@ -1,0 +1,8 @@
+# Default trajectory settings.
+
+trajectory:
+  path: hover
+  scale: 5.0
+  period: 20.0
+  altitude: 5.0
+  start_with_hover: true

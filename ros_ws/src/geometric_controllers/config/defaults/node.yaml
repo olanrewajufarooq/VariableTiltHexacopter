@@ -1,0 +1,4 @@
+# Default ROS node settings.
+
+node:
+  rate_hz: 100.0
